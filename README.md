@@ -37,7 +37,7 @@ MCP-Bench is a comprehensive evaluation framework designed to assess Large Langu
 | 19 | llama-3-2-90b-vision-instruct | 0.495 |
 | 20 | llama-3-1-8b-instruct | 0.428 |
 
-*Overall Score represents the average performance across all evaluation dimensions including rule-based schema understanding, LLM-judged task completion, tool usage, and planning effectiveness. Scores are averaged across single-server and multi-server settings.*
+*Overall Score represents the average performance across all evaluation dimensions including rule-based schema understanding, LLM-judged (o4-mini as judge model) task completion, tool usage, and planning effectiveness. Scores are averaged across single-server and multi-server settings.*
 
 ## Quick Start
 
@@ -103,6 +103,7 @@ source .env
 python run_benchmark.py --list-models 
 
 # 3. Run benchmark (gpt-oss-20b as an example)
+##Must use o4-mini as judge model (hard-coded in line 429-436 in ./benchmark/runner.py) to reproduce the results.
 ## run all tasks
 source .env
 python run_benchmark.py --models gpt-oss-20b

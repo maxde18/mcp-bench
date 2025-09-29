@@ -30,7 +30,7 @@ mcp:
 # Task execution related configuration
 execution:
   # Single task execution timeout (seconds)
-  task_timeout: 3000
+  task_timeout: 5000
   # Maximum task retry count
   task_retry_max: 3
   # Retry delay interval (seconds)
