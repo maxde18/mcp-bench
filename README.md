@@ -12,6 +12,10 @@
 
 MCP-Bench is a comprehensive evaluation framework designed to assess Large Language Models' (LLMs) capabilities in tool-use scenarios through the Model Context Protocol (MCP). This benchmark provides an end-to-end pipeline for evaluating how effectively different LLMs can discover, select, and utilize tools to solve real-world tasks.
 
+## News
+
+* [2025-09] MCP-Bench is accepted to NeurIPS 2025 Workshop on Scaling Environments for Agents.
+
 ## Leaderboard
 
 | Rank | Model | Overall Score |
