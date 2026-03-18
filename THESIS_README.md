@@ -612,7 +612,7 @@ A minimal combinations file containing only the Paper Search + BioMCP pairing. P
 ```bash
 python synthesis/generate_benchmark_tasks.py \
     --mode multi \
-    --combinations-file synthesis/split_combinations/paper_search_biomcp_only.json \
+    --combinations-file synthesis/split_combinations/paper_plan_travel.json \
     --tasks-per-combination 10 \
     --output tasks/paper_search_biomcp_10_variations.json
 ```
