@@ -1,0 +1,14 @@
+{
+  "mcp_server_combinations": {
+    "two_server_combinations": [
+      {
+        "name": "Academic Research Duo",
+        "servers": [
+          "Paper Search",
+          "BioMCP"
+        ],
+        "description": "Academic literature with biomedical analysis"
+      }
+    ]
+  }
+}

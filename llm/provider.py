@@ -17,8 +17,14 @@ import json_repair
 logger = logging.getLogger(__name__)
 
 MODELS_WITH_MAX_COMPLETION_TOKENS: Set[str] = {
-    "o1-preview", "o1-mini", "o4-mini", "o3-mini", "o3", 
+    "o1-preview", "o1-mini", "o4-mini", "o3-mini", "o3",
     "gpt-4o", "gpt-4o-mini", "gpt-5"
+}
+
+# Reasoning models that do not accept a custom temperature value.
+# Passing temperature to these models causes an API error.
+MODELS_WITHOUT_TEMPERATURE: Set[str] = {
+    "o1-preview", "o1-mini", "o4-mini", "o3-mini", "o3"
 }
 
 
@@ -128,22 +134,31 @@ class LLMProvider:
             
         return None, None
 
-    async def get_completion(self, system_prompt: str, user_prompt: str, max_tokens: int, return_usage: bool = False) -> Any:
+    async def get_completion(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        max_tokens: int,
+        return_usage: bool = False,
+        temperature: Optional[float] = None,
+    ) -> Any:
         """Get a completion from the LLM with retry mechanism.
-        
+
         Args:
             system_prompt: System message to set context
             user_prompt: User's input prompt
             max_tokens: Maximum tokens for the response
             return_usage: If True, returns tuple of (content, usage_dict)
-            
+            temperature: Sampling temperature (0.0–2.0). Ignored for reasoning
+                models (o-series) which do not accept this parameter.
+
         Returns:
             The LLM's response as a string, or tuple of (content, usage_dict) if return_usage=True
-            
+
         Raises:
             Exception: If all retry attempts fail
         """
-        
+
         params = {
             "model": self.deployment_name,
             "messages": [
@@ -151,7 +166,7 @@ class LLMProvider:
                 {"role": "user", "content": user_prompt}
             ],
         }
-        
+
         # Handle different token parameter names
         if self.provider_type == "azure":
             if self.deployment_name in MODELS_WITH_MAX_COMPLETION_TOKENS:
@@ -160,6 +175,16 @@ class LLMProvider:
                 params["max_tokens"] = max_tokens
         else:
             params["max_tokens"] = max_tokens
+
+        # Apply temperature if provided, skipping unsupported reasoning models
+        if temperature is not None:
+            if self.deployment_name in MODELS_WITHOUT_TEMPERATURE:
+                logger.warning(
+                    f"Model '{self.deployment_name}' does not support custom temperature. "
+                    "Ignoring temperature parameter."
+                )
+            else:
+                params["temperature"] = temperature
         
         # Simple retry mechanism: 3 attempts with exponential backoff
         max_attempts = 3
