@@ -6,7 +6,7 @@ env/
 .env/
 
 #apikeys
-api_key
+/mcp_servers/api_key
 .env
 
 # Python cache
