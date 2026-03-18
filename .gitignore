@@ -5,6 +5,10 @@ env/
 .venv/
 .env/
 
+#apikeys
+api_key
+.env
+
 # Python cache
 __pycache__/
 *.py[cod]
