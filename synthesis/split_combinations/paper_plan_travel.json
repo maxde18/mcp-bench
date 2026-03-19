@@ -1,0 +1,15 @@
+{
+  "mcp_server_combinations": {
+    "three_server_combinations": [
+      {
+        "name": "Travel Planning Suite",
+        "servers": [
+          "Google Maps",
+          "Weather Data",
+          "National Parks"
+        ],
+        "description": "Complete travel planning tools"
+      }
+    ]
+  }
+}

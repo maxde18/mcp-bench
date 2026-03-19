@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from openai import AsyncAzureOpenAI
 
 from agent.executor import TaskExecutor
+from agent.langgraph_executor import LangGraphExecutor
 from mcp_modules.server_manager_persistent import PersistentMultiServerManager
 from llm.provider import LLMProvider
 from llm.factory import LLMFactory
@@ -486,10 +487,9 @@ class BenchmarkRunner:
                             }
                     
                     # Create executor and execute task
-                    executor = TaskExecutor(
-                        llm_provider, 
-                        conn_mgr.server_manager, 
-                        self.concurrent_summarization
+                    executor = LangGraphExecutor(
+                        llm_provider,
+                        conn_mgr.server_manager,
                     )
                     
                     

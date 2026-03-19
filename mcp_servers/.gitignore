@@ -50,3 +50,6 @@ htmlcov/
 # Python egg info
 *.egg-info/
 .eggs/
+
+#api key file
+api_key
