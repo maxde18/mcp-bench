@@ -1,0 +1,70 @@
+{
+  "run_timestamp": "2026-03-19T15:01:44.917343",
+  "model": "claude-sonnet-4",
+  "source": "tasks/paper_plan_travel_1_variations_runner_format.json",
+  "experiment_config": {
+    "repetitions": 2,
+    "temperatures": [
+      null
+    ],
+    "total_tasks": 1,
+    "total_runs": 2
+  },
+  "summary": {
+    "successful_runs": 0,
+    "failed_runs": 2
+  },
+  "results": [
+    {
+      "task_id": "google_maps_weather_data_national_parks_000",
+      "server_name": "Google Maps+Weather Data+National Parks",
+      "fuzzy_description": "\"Hey, so I’ve been trying to plan a weekend hiking trip with some friends and I’m totally stuck. We wanna go to a national park in California but I’m not sure which one to pick. I remember there are a few near the coast that have great trails—maybe like five options? If we go with the first one that pops up, I guess… but I need to check if the weather’s going to be cooperative. You know how spring can be weird out there—might be sunny one day and pouring the next. Oh, and I should check if there are any trail closures or alerts for that park, honestly. Would hate to drive four hours just to find out the main trail’s washed out.  \n\nWhile we’re at it, there’s gotta be a decent place to eat nearby, right? Like, within walking distance of the park entrance. Something with good reviews—maybe four stars or higher? And we need to leave LA pretty early, so I need to know exactly how long the drive will take. If someone can get me real data on the weather, the park’s status, and how far it is from LA, plus a restaurant suggestion… that’d be huge. Can’t make a decision without knowing if it’s even feasible!\"\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
+      "runs": [
+        {
+          "temperature": null,
+          "repetition": 0,
+          "status": "failed",
+          "error": "Connection error."
+        },
+        {
+          "temperature": null,
+          "repetition": 1,
+          "status": "failed",
+          "error": "Connection error."
+        }
+      ],
+      "ground_truth": {
+        "task_description": "Plan a weekend visit to a national park in California for hiking by evaluating weather conditions, park alerts, and nearby amenities. First, identify up to 5 national parks in California offering hiking opportunities using National Parks:findParks (params: stateCode=\"CA\", activities=\"hiking\", limit=5). Select the first park listed and retrieve its address via National Parks:getParkDetails. Convert the park's address into coordinates using Google Maps:maps_geocode. Use these coordinates to determine the nearest city via Google Maps:maps_reverse_geocode. Fetch current weather and 3-day forecast for that city using Weather Data tools. Check for active alerts or closures in the selected park via National Parks:getAlerts. Search for 4-star+ currently open dining options within 1 km of the park using Google Maps:search_nearby (radius=1000, minRating=4, openNow=true). Finally, calculate travel distance and duration from Los Angeles to the park using Google Maps:maps_distance_matrix (mode=driving) to plan arrival time.",
+        "dependency_analysis": {
+          "tool_chains": [
+            "National Parks:findParks → National Parks:getParkDetails → Google Maps:maps_geocode → Google Maps:maps_reverse_geocode → Weather Data:get_current_weather_tool & get_weather_forecast_tool",
+            "National Parks:getParkDetails → National Parks:getAlerts",
+            "Google Maps:maps_geocode → Google Maps:search_nearby & Google Maps:maps_distance_matrix",
+            "Google Maps:maps_geocode → Google Maps:maps_distance_matrix (with LA as fixed origin)"
+          ],
+          "decision_points": [
+            "If no parks return hiking activities, retry without activity filter",
+            "If geocode fails, try reverse geocoding initial findParks response's park name",
+            "If weather forecasts show rain/snow for all 3 days, recommend alternate activities",
+            "If no parks have dining within 1 km, suggest 'transport_required: true'"
+          ],
+          "cross_server_dependencies": [
+            "National Parks park address → Google Maps geocoding for coordinate conversion",
+            "Google Maps reverse-geocoded city → Weather Data weather queries",
+            "National Parks parkCode from findParks → subsequent getAlerts queries",
+            "Google Maps geocoordinates from park address → distance matrix calculation from LA"
+          ],
+          "iterative_components": [
+            "Initial parks search may require activity filtering refinement if no matches"
+          ],
+          "data_transformations": [
+            "Parse park address from text format into geocode input",
+            "Extract city name from reverse-geocode JSON for weather API",
+            "Convert parkCode string to query parameter for alerts endpoint",
+            "Transform Google Maps distance/duration JSON into human-readable travel summary"
+          ]
+        }
+      }
+    }
+  ]
+}
