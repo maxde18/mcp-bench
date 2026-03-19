@@ -82,7 +82,11 @@ from typing import Any, Dict, List, Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+# Strip carriage returns from all env vars in case .env was saved with Windows line endings
+for _k, _v in os.environ.items():
+    if '\r' in _v:
+        os.environ[_k] = _v.replace('\r', '')
 
 from agent.plan_only_executor import PlanOnlyExecutor
 from benchmark.runner import BenchmarkRunner, ConnectionManager

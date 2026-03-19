@@ -109,11 +109,12 @@ class LLMFactory:
             )
         
         # OpenRouter models
-        if os.getenv("OPENROUTER_API_KEY"):
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+        if openrouter_api_key:
             configs["qwen-3-32b"] = ModelConfig(
                 name="qwen-3-32b",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="qwen/qwen3-32b"
             )
@@ -121,7 +122,7 @@ class LLMFactory:
             configs["qwen3-30b-a3b-instruct-2507"] = ModelConfig(
                 name="qwen3-30b-a3b-instruct-2507",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="qwen/qwen3-30b-a3b-instruct-2507"
             )
@@ -129,7 +130,7 @@ class LLMFactory:
             configs["qwen3-235b-a22b-thinking-2507"] = ModelConfig(
                 name="qwen3-235b-a22b-thinking-2507",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="qwen/qwen3-235b-a22b-thinking-2507"
             )
@@ -137,7 +138,7 @@ class LLMFactory:
             configs["qwen3-235b-a22b-2507"] = ModelConfig(
                 name="qwen3-235b-a22b-2507",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="qwen/qwen3-235b-a22b-2507"
             )
@@ -145,7 +146,7 @@ class LLMFactory:
             configs["gpt-oss-20b"] = ModelConfig(
                 name="gpt-oss-20b",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="openai/gpt-oss-20b"
             )
@@ -153,7 +154,7 @@ class LLMFactory:
             configs["gpt-oss-120b"] = ModelConfig(
                 name="gpt-oss-120b",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="openai/gpt-oss-120b"
             )
@@ -161,7 +162,7 @@ class LLMFactory:
             configs["kimi-k2"] = ModelConfig(
                 name="kimi-k2",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="moonshotai/kimi-k2"
             )
@@ -169,7 +170,7 @@ class LLMFactory:
             configs["minimax-m1"] = ModelConfig(
                 name="minimax-m1",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="minimax/minimax-m1"
             )
@@ -177,7 +178,7 @@ class LLMFactory:
             configs["nova-micro-v1"] = ModelConfig(
                 name="nova-micro-v1",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="amazon/nova-micro-v1"
             )
@@ -185,7 +186,7 @@ class LLMFactory:
             configs["grok-3-mini"] = ModelConfig(
                 name="grok-3-mini",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="x-ai/grok-3-mini"
             )
@@ -193,7 +194,7 @@ class LLMFactory:
             configs["gemini-2.5-flash-lite"] = ModelConfig(
                 name="gemini-2.5-flash-lite",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="google/gemini-2.5-flash-lite"
             )
@@ -201,7 +202,7 @@ class LLMFactory:
             configs["gpt-5-mini-openrouter"] = ModelConfig(
                 name="gpt-5-mini-openrouter",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="openai/gpt-5-mini"
             )
@@ -209,7 +210,7 @@ class LLMFactory:
             configs["gpt-5-nano"] = ModelConfig(
                 name="gpt-5-nano",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="openai/gpt-5-nano"
             )
@@ -217,7 +218,7 @@ class LLMFactory:
             configs["deepseek-r1-0528"] = ModelConfig(
                 name="deepseek-r1-0528",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="deepseek/deepseek-r1-0528"
             )
@@ -225,7 +226,7 @@ class LLMFactory:
             configs["deepseek-r1-0528-qwen3-8b"] = ModelConfig(
                 name="deepseek-r1-0528-qwen3-8b",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="deepseek/deepseek-r1-0528-qwen3-8b"
             )
@@ -233,7 +234,7 @@ class LLMFactory:
             configs["ernie-4.5-21b-a3b"] = ModelConfig(
                 name="ernie-4.5-21b-a3b",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="baidu/ernie-4.5-21b-a3b"
             )
@@ -241,7 +242,7 @@ class LLMFactory:
             configs["glm-4.5-air"] = ModelConfig(
                 name="glm-4.5-air",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="z-ai/glm-4.5-air"
             )
@@ -249,7 +250,7 @@ class LLMFactory:
             configs["mistral-small-3.2-24b-instruct"] = ModelConfig(
                 name="mistral-small-3.2-24b-instruct",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="mistralai/mistral-small-3.2-24b-instruct"
             )
@@ -257,7 +258,7 @@ class LLMFactory:
             configs["gemma-3-27b-it"] = ModelConfig(
                 name="gemma-3-27b-it",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="google/gemma-3-27b-it"
             )
@@ -265,7 +266,7 @@ class LLMFactory:
             configs["qwq-32b"] = ModelConfig(
                 name="qwq-32b",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="qwen/qwq-32b"
             )
@@ -273,7 +274,7 @@ class LLMFactory:
             configs["glm-4.5"] = ModelConfig(
                 name="glm-4.5",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="z-ai/glm-4.5"
             )
@@ -281,7 +282,7 @@ class LLMFactory:
             configs["claude-sonnet-4"] = ModelConfig(
                 name="claude-sonnet-4",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="anthropic/claude-sonnet-4"
             )
@@ -289,7 +290,7 @@ class LLMFactory:
             configs["gemini-2.5-pro"] = ModelConfig(
                 name="gemini-2.5-pro",
                 provider_type="openrouter",
-                api_key=os.getenv("OPENROUTER_API_KEY"),
+                api_key=openrouter_api_key,
                 base_url="https://openrouter.ai/api/v1",
                 model_name="google/gemini-2.5-pro"
             )
