@@ -81,6 +81,9 @@ from typing import Any, Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from agent.plan_only_executor import PlanOnlyExecutor
 from benchmark.runner import BenchmarkRunner, ConnectionManager
 from llm.factory import LLMFactory
