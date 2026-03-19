@@ -149,6 +149,7 @@ async def run(
         enable_distraction_servers=True,
     )
     servers_info = await runner.load_server_configs()
+    runner.commands_config = await runner.load_commands_config()
 
     # ------------------------------------------------------------------
     # Load and normalise tasks
