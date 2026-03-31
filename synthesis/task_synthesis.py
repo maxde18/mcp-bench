@@ -463,7 +463,14 @@ Focus on creating a task that CANNOT be completed without understanding tool dep
         return selected
     
     
-    async def _generate_fuzzy_version(self, 
+    async def generate_fuzzy_version(self,
+                                    detailed_task: str,
+                                    tools: Dict[str, Any],
+                                    server_name: str = None) -> Optional[str]:
+        """Public method to generate a fuzzy description from a detailed task description."""
+        return await self._generate_fuzzy_version(detailed_task, tools, server_name)
+
+    async def _generate_fuzzy_version(self,
                                      detailed_task: str,
                                      tools: Dict[str, Any],
                                      server_name: str = None) -> Optional[str]:
@@ -480,7 +487,7 @@ Focus on creating a task that CANNOT be completed without understanding tool dep
         # Also check tool names for calculation keywords
         if not is_calculation_task and tools:
             tool_names_str = ' '.join(tools.keys()).lower()
-            calc_keywords = ['calculat', 'compute', 'math', 'formula', 'equation', 'convert']
+            calc_keywords = ['calculate', 'compute', 'math', 'formula', 'equation', 'convert']
             is_calculation_task = any(keyword in tool_names_str for keyword in calc_keywords)
         
         # Add special requirements for calculation tasks
