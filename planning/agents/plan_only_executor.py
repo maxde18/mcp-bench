@@ -14,9 +14,13 @@ from langgraph.graph import END, StateGraph
 
 import config.config_loader as config_loader
 from mcp_infra.connector import MCPConnector
+from planning.agents.few_shot_examples import EXAMPLES, format_few_shot_block
 from planning.validation import validate_dag
 
 logger = logging.getLogger(__name__)
+
+# Computed once at import time — static data, no need to rebuild per call.
+_FEW_SHOT_BLOCK = format_few_shot_block(EXAMPLES)
 
 # OpenRouter structured output schema for the dependency graph response.
 # Passed as response_format when the provider is "openrouter".
@@ -40,6 +44,8 @@ _DEPENDENCY_GRAPH_RESPONSE_FORMAT = {
                                 "items": {"type": "string"},
                             },
                             "description": {"type": "string"},
+                            "filter":      {"type": "string"},
+                            "condition":   {"type": "string"},
                         },
                         "required": ["id", "tool", "parameters", "depends_on", "description"],
                     },
@@ -49,6 +55,60 @@ _DEPENDENCY_GRAPH_RESPONSE_FORMAT = {
         },
     },
 }
+
+
+def _build_planner_prompt(task: str, tools_section: str, extra_rules: str = "") -> str:
+    """Build the planner prompt.
+
+    Args:
+        task:          The task description shown to the agent.
+        tools_section: The block describing available tools (differs between
+                       native-tools mode and text-based mode).
+        extra_rules:   Optional additional rule lines prepended to the common
+                       rules block (used for the native-tools name convention).
+    """
+    return f"""You are a planning agent. Given a task and a set of available tools,
+produce a complete execution plan as a dependency graph (DAG).
+
+{_FEW_SHOT_BLOCK}
+
+Now produce the plan for the following task.
+
+TASK:
+{task}
+
+{tools_section}
+
+Return ONLY valid JSON in this exact schema — no prose, no markdown fences:
+{{
+  "nodes": [
+    {{
+      "id": "1",
+      "tool": "ServerName:tool_name",
+      "parameters": {{"param": "value"}},
+      "depends_on": [],
+      "description": "one-line description of what this step does",
+      "filter": "(optional) post-execution filter expression on this node's output",
+      "condition": "(optional) boolean gate — node only executes when this is true"
+    }}
+  ]
+}}
+
+Rules:
+{extra_rules}- Each node id must be a unique string ("1", "2", ...).
+- "depends_on" lists the ids of nodes whose output is needed before this node runs.
+- Nodes with no shared dependencies will be executed in parallel.
+- When a parameter value depends on a previous node's output, write it as
+  "{{node_id.field}}" (e.g. "{{"variant_id": "{{2.id}}"}}").
+- Only include tools that are actually needed to complete the task.
+- The graph must be a valid DAG (no cycles).
+- "filter" is optional. Use it when the task requires keeping only results that
+  match a post-execution predicate (e.g. "license == 'apache-2.0' AND weight_size < 2000000000").
+- "condition" is optional. Use it as a boolean gate that determines whether a node
+  executes at all based on a prior node's output. For conditional branching, create
+  two separate nodes with complementary conditions rather than combining tools in
+  one node.
+"""
 
 
 # ---------------------------------------------------------------------------
@@ -128,42 +188,16 @@ class PlanOnlyExecutor:
         if state["use_native_tools"]:
             api_tools = MCPConnector.format_tools_for_api(self.all_tools)
             tool_descriptions = "native"
-
-            prompt = f"""You are a planning agent. Given a task and a set of available tools,
-produce a complete execution plan as a dependency graph (DAG).
-
-TASK:
-{state["task"]}
-
-The available tools are provided in the 'tools' field of this request.
-Each tool name uses '__' as a separator between server name and tool name
-(e.g. 'BioMCP__gene_getter' corresponds to the tool 'BioMCP:gene_getter').
-
-Return ONLY valid JSON in this exact schema — no prose, no markdown fences:
-{{
-  "nodes": [
-    {{
-      "id": "1",
-      "tool": "ServerName:tool_name",
-      "parameters": {{"param": "value"}},
-      "depends_on": [],
-      "description": "one-line description of what this step does"
-    }}
-  ]
-}}
-
-Rules:
-- Use the original colon-separated name (e.g. "BioMCP:gene_getter") in the
-  "tool" field of each node — not the double-underscore API name.
-- Each node id must be a unique string ("1", "2", ...).
-- "depends_on" lists the ids of nodes whose output is needed before this node runs.
-- Nodes with no shared dependencies will be executed in parallel.
-- When a parameter value depends on a previous node's output, write it as
-  "{{node_id.field}}" (e.g. "{{"variant_id": "{{2.id}}"}}").
-- Only include tools that are actually needed to complete the task.
-- The graph must be a valid DAG (no cycles).
-"""
-
+            tools_section = (
+                "The available tools are provided in the 'tools' field of this request.\n"
+                "Each tool name uses '__' as a separator between server name and tool name\n"
+                "(e.g. 'BioMCP__gene_getter' corresponds to the tool 'BioMCP:gene_getter')."
+            )
+            extra_rules = (
+                '- Use the original colon-separated name (e.g. "BioMCP:gene_getter") in the\n'
+                '  "tool" field of each node — not the double-underscore API name.\n'
+            )
+            prompt = _build_planner_prompt(state["task"], tools_section, extra_rules)
             response_data = await self.llm.get_completion_with_tools(
                 "You are an expert planning agent that produces tool dependency graphs.",
                 prompt,
@@ -176,39 +210,8 @@ Rules:
             )
         else:
             tool_descriptions = MCPConnector.format_tools_for_prompt(self.all_tools)
-
-            prompt = f"""You are a planning agent. Given a task and a set of available tools,
-produce a complete execution plan as a dependency graph (DAG).
-
-TASK:
-{state["task"]}
-
-AVAILABLE TOOLS:
-{tool_descriptions}
-
-Return ONLY valid JSON in this exact schema — no prose, no markdown fences:
-{{
-  "nodes": [
-    {{
-      "id": "1",
-      "tool": "ServerName:tool_name",
-      "parameters": {{"param": "value"}},
-      "depends_on": [],
-      "description": "one-line description of what this step does"
-    }}
-  ]
-}}
-
-Rules:
-- Each node id must be a unique string ("1", "2", ...).
-- "depends_on" lists the ids of nodes whose output is needed before this node runs.
-- Nodes with no shared dependencies will be executed in parallel.
-- When a parameter value depends on a previous node's output, write it as
-  "{{node_id.field}}" (e.g. "{{"variant_id": "{{2.id}}"}}").
-- Only include tools that are actually needed to complete the task.
-- The graph must be a valid DAG (no cycles).
-"""
-
+            tools_section = f"AVAILABLE TOOLS:\n{tool_descriptions}"
+            prompt = _build_planner_prompt(state["task"], tools_section)
             response_data = await self.llm.get_completion(
                 "You are an expert planning agent that produces tool dependency graphs.",
                 prompt,
