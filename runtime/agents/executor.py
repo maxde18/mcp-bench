@@ -12,9 +12,9 @@ import logging
 from typing import List, Dict, Any, Optional, Tuple
 
 from llm.provider import LLMProvider
-from mcp_modules.server_manager_persistent import PersistentMultiServerManager as MultiServerManager
-from mcp_modules.connector import MCPConnector
-from agent.execution_context import ExecutionContext
+from mcp_infra.server_manager_persistent import PersistentMultiServerManager as MultiServerManager
+from mcp_infra.connector import MCPConnector
+from runtime.agents.execution_context import ExecutionContext
 import config.config_loader as config_loader
 from utils.error_handler import handle_errors
 
@@ -823,7 +823,7 @@ class TaskExecutor:
     @handle_errors("calculating tool token consumption", reraise=False)
     def _log_tools_token_stats(self):
         """Log token consumption statistics for tool descriptions and input schemas"""
-        from mcp_modules.connector import MCPConnector
+        from mcp_infra.connector import MCPConnector
         
         # Calculate token consumption for all available tools
         stats = MCPConnector.estimate_tools_token_count(self.all_tools)

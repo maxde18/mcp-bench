@@ -15,8 +15,8 @@ from mcp.client.stdio import stdio_client
 
 import config.config_loader as config_loader
 
-from mcp_modules.connector import MCPConnector
-from mcp_modules.tool_cache import get_cache
+from mcp_infra.connector import MCPConnector
+from mcp_infra.tool_cache import get_cache
 
 logger = logging.getLogger(__name__)
 

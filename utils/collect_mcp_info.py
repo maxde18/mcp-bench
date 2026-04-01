@@ -22,7 +22,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Use the same imports and classes as multiturn_mcp_agent.py
-from mcp_modules.server_manager import MultiServerManager
+from mcp_infra.server_manager import MultiServerManager
 from utils.local_server_config import LocalServerConfigLoader
 import config.config_loader as config_loader
 

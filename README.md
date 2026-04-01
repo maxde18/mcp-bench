@@ -1,334 +1,476 @@
-# MCP-Bench: Benchmarking Tool-Using LLM Agents with Complex Real-World Tasks via MCP Servers
+# Planning Phase Analysis of LLM Tool-Use Agents
 
-[![arXiv](https://img.shields.io/badge/arXiv-2508.20453-b31b1b.svg)](https://arxiv.org/abs/2508.20453)
-[![Leaderboard](https://img.shields.io/badge/🤗%20Hugging%20Face-Leaderboard-FFD21E)](https://huggingface.co/spaces/mcpbench/mcp-bench)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/downloads/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-Protocol-green)](https://github.com/anthropics/mcp)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-![MCP-Bench](./images/mcpbench_intro.png)
+This repository contains the experimental codebase for a thesis investigating the **planning phase of LLM tool-use agents**. Rather than evaluating end-to-end task performance, the focus is on whether and how an agent's planning behaviour — expressed as a tool dependency graph (DAG) — changes across models, prompts, and runs.
 
-## Overview
+The project is built on top of [MCP-Bench](https://arxiv.org/abs/2508.20453), a benchmark framework for evaluating LLM agents across 28 MCP servers. The full execution infrastructure from MCP-Bench is retained under `runtime/` for reference and future use, but the primary experimental work lives in `planning/`, `dag/`, and `analysis/`.
 
-MCP-Bench is a comprehensive evaluation framework designed to assess Large Language Models' (LLMs) capabilities in tool-use scenarios through the Model Context Protocol (MCP). This benchmark provides an end-to-end pipeline for evaluating how effectively different LLMs can discover, select, and utilize tools to solve real-world tasks.
+---
 
-## News
+## Research Focus
 
-* [2025-09] MCP-Bench is accepted to NeurIPS 2025 Workshop on Scaling Environments for Agents.
+For each task, an agent produces a **tool dependency graph**: a DAG where nodes are tool calls and edges encode data dependencies between them. The thesis collects these DAGs across multiple runs and models and analyses:
 
-## Leaderboard
+- Whether the agent selects the correct tools and orders them correctly
+- How much variance exists in plans across repeated runs of the same task
+- Whether changes to the model or prompt measurably shift planning behaviour
 
-| Rank | Model | Overall Score |
-|------|-------|---------------|
-| 1 | gpt-5 | 0.749 |
-| 2 | o3 | 0.715 |
-| 3 | gpt-oss-120b | 0.692 |
-| 4 | gemini-2.5-pro | 0.690 |
-| 5 | claude-sonnet-4 | 0.681 |
-| 6 | qwen3-235b-a22b-2507 | 0.678 |
-| 7 | glm-4.5 | 0.668 |
-| 8 | gpt-oss-20b | 0.654 |
-| 9 | kimi-k2 | 0.629 |
-| 10 | qwen3-30b-a3b-instruct-2507 | 0.627 |
-| 11 | gemini-2.5-flash-lite | 0.598 |
-| 12 | gpt-4o | 0.595 |
-| 13 | gemma-3-27b-it | 0.582 |
-| 14 | llama-3-3-70b-instruct | 0.558 |
-| 15 | gpt-4o-mini | 0.557 |
-| 16 | mistral-small-2503 | 0.530 |
-| 17 | llama-3-1-70b-instruct | 0.510 |
-| 18 | nova-micro-v1 | 0.508 |
-| 19 | llama-3-2-90b-vision-instruct | 0.495 |
-| 20 | llama-3-1-8b-instruct | 0.428 |
+---
 
-*Overall Score represents the average performance across all evaluation dimensions including rule-based schema understanding, LLM-judged (o4-mini as judge model) task completion, tool usage, and planning effectiveness. Scores are averaged across single-server and multi-server settings.*
+## Repository Structure
 
-## Quick Start
-
-### Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/accenture/mcp-bench.git
-cd mcp-bench
+```
+mcp-bench/
+│
+│  ── THESIS CORE ────────────────────────────────────────────────────
+│
+├── planning/                  # Planning-phase agents
+│   └── agents/
+│       ├── plan_only_executor.py    # Single LLM call → DAG output, no tool execution
+│       └── langgraph_executor.py   # Plan-then-execute agent via LangGraph
+│
+├── dag/                       # Tool dependency graph analysis
+│   ├── models.py              # DAG node/edge data structures
+│   ├── extractor.py           # Parse agent plan output → DAG
+│   ├── comparator.py          # Similarity metrics and behavioural diff between DAGs
+│   └── store.py               # Persist and retrieve DAGs by task/run/model
+│
+├── analysis/                  # Experiment notebooks and visualisations
+│
+│  ── SHARED INFRASTRUCTURE ──────────────────────────────────────────
+│
+├── mcp/                       # MCP server infrastructure (planning AND execution)
+│   ├── connector.py           # Connects to a single server; discovers and formats tool schemas
+│   ├── server_manager.py      # Non-persistent multi-server manager
+│   ├── server_manager_persistent.py  # Persistent multi-server manager
+│   ├── tool_cache.py          # Tool result caching
+│   └── connection_manager.py  # Async context manager: connect servers, expose all_tools
+│
+├── tasks/                     # Pre-generated benchmark task files
+│   ├── mcpbench_tasks_single_runner_format.json    # ~30 single-server tasks
+│   ├── mcpbench_tasks_multi_2server_runner_format.json  # ~100 two-server tasks
+│   └── mcpbench_tasks_multi_3server_runner_format.json  # ~60 three-server tasks
+├── synthesis/                 # Task generation pipeline
+├── config/                    # benchmark_config.yaml + config loader
+├── llm/                       # LLM provider abstraction (OpenRouter, Azure)
+├── utils/                     # MCP server discovery, error handling
+│
+│  ── SECONDARY / FUTURE WORK ────────────────────────────────────────
+│
+├── runtime/                   # Full execution infrastructure (from MCP-Bench)
+│   ├── agents/                # Baseline multi-round executor
+│   └── benchmark/             # LLM-as-judge evaluation pipeline
+│
+├── mcp_servers/               # 28 MCP server implementations
+│
+│  ── ENTRY POINTS ───────────────────────────────────────────────────
+│
+├── run_planning.py            # Primary: planning benchmark + DAG collection
+└── run_benchmark.py           # Secondary: full execution benchmark
 ```
 
-2. **Install dependencies**
+### Restructuring rationale
+
+| Change | Reason |
+|--------|--------|
+| `planning/` introduced | Isolates the planning-phase agents as the primary research artefact |
+| `dag/` introduced | First-class module for DAG extraction, comparison, and storage |
+| `analysis/` replaces `network_generation/` | Clearer name; home for experiment notebooks and visualisations |
+| `mcp/` promoted to top level | Planning agents require MCP connections for tool **discovery** (not just execution). Placing the MCP module alongside `planning/` reflects that it is shared infrastructure, not execution-only |
+| `mcp/connection_manager.py` extracted | `ConnectionManager` was buried in `runtime/benchmark/runner.py`; it is now a named shared component used by both the planning runner and the full benchmark runner |
+| `runtime/` contains only execution code | Now holds only the baseline execution agent and the LLM-as-judge pipeline — nothing the planning workflow depends on |
+| `run_planning.py` as primary entry point | Renamed from `run_planning_benchmark.py` |
+
+---
+
+## Setup
+
+### 1. Install dependencies
+
 ```bash
 conda create -n mcpbench python=3.10
 conda activate mcpbench
 cd mcp_servers
-# Install MCP server dependencies
 bash ./install.sh
 cd ..
 ```
 
-3. **Set up environment variables**
+### 2. Set up API keys
+
 ```bash
-# Create .env file with API keys
-# Default setup uses both OpenRouter and Azure OpenAI
-# For Azure OpenAI, you also need to set your API version in file benchmark_config.yaml (line205)
-# For OpenRouter-only setup, see "Optional: Using only OpenRouter API" section below
 cat > .env << EOF
-export OPENROUTER_API_KEY="your_openrouterkey_here"
-export AZURE_OPENAI_API_KEY="your_azureopenai_apikey_here"
-export AZURE_OPENAI_ENDPOINT="your_azureopenai_endpoint_here"
+export OPENROUTER_API_KEY="your_openrouter_key"
 EOF
 ```
 
-4. **Configure MCP Server API Keys**
+### 3. Configure MCP server API keys
 
-Some MCP servers require external API keys to function properly. These keys are automatically loaded from `./mcp_servers/api_key`. You should set these keys by yourself in file `./mcp_servers/api_key`:
+Some servers require external API keys. Set them in `./mcp_servers/api_key`:
+
+| Key | Server | Where to get it |
+|-----|--------|-----------------|
+| `NPS_API_KEY` | National Parks | [nps.gov](https://www.nps.gov/subjects/developer/get-started.htm) |
+| `NASA_API_KEY` | NASA Data | [api.nasa.gov](https://api.nasa.gov/) |
+| `HF_TOKEN` | Hugging Face | [huggingface.co](https://huggingface.co/docs/hub/security-tokens) |
+| `GOOGLE_MAPS_API_KEY` | Google Maps | [developers.google.com](https://developers.google.com/maps) |
+| `NCI_API_KEY` | BioMCP | [clinicaltrialsapi.cancer.gov](https://clinicaltrialsapi.cancer.gov/signin) |
+
+### 4. Verify server connectivity
 
 ```bash
-# View configured API keys
-cat ./mcp_servers/api_key
+python utils/collect_mcp_info.py
+# Expected: "28/28 servers connected" and all tools returned
 ```
 
-Required API keys include (These API keys are free and easy to get. You can get all of them within 10 mins):
-- `NPS_API_KEY`: National Park Service API key (for nationalparks server) - [Get API key](https://www.nps.gov/subjects/developer/get-started.htm)
-- `NASA_API_KEY`: NASA Open Data API key (for nasa-mcp server) - [Get API key](https://api.nasa.gov/)
-- `HF_TOKEN`: Hugging Face token (for huggingface-mcp-server) - [Get token](https://huggingface.co/docs/hub/security-tokens)
-- `GOOGLE_MAPS_API_KEY`: Google Maps API key (for mcp-google-map server) - [Get API key](https://developers.google.com/maps)
-- `NCI_API_KEY`: National Cancer Institute API key (for biomcp server) - [Get API key](https://clinicaltrialsapi.cancer.gov/signin) This api key registration website might require US IP to open, see Issue #10 if you have difficulies for getting this api key.
+---
 
+## Running Planning Experiments
 
-### Basic Usage
+All planning agents are implemented using LangGraph. The primary agent (`PlanOnlyExecutor`) uses a single LangGraph node that makes one LLM call and emits a DAG; the `LangGraphExecutor` uses a multi-node graph (planner → executor → synthesizer) for plan-then-execute experiments.
 
 ```bash
-# 1. Verify all MCP servers can be connected
-##You should see "28/28 servers connected" 
-##and "All successfully connected servers returned tools!" after running this
-python ./utils/collect_mcp_info.py
-
-
-# 2. List available models
 source .env
-python run_benchmark.py --list-models 
 
-# 3. Run benchmark (gpt-oss-20b as an example)
-##Must use o4-mini as judge model (hard-coded in line 429-436 in ./benchmark/runner.py) to reproduce the results.
-## run all tasks
+# Single-server tasks (~30 tasks)
+python run_planning.py \
+    --tasks tasks/mcpbench_tasks_single_runner_format.json \
+    --model claude-sonnet-4
+
+# Two-server tasks (~100 tasks)
+python run_planning.py \
+    --tasks tasks/mcpbench_tasks_multi_2server_runner_format.json \
+    --model claude-sonnet-4
+
+# Three-server tasks (~60 tasks)
+python run_planning.py \
+    --tasks tasks/mcpbench_tasks_multi_3server_runner_format.json \
+    --model claude-sonnet-4
+```
+
+The planner makes one LLM call per task and returns a tool dependency DAG. No tools are executed. Results are saved under `results/planning/<model>/<timestamp>/`.
+
+### Tool input mode: prompt text vs. native API field
+
+By default, tool schemas are formatted as plain text and embedded in the user prompt. This works with any model but means the tool descriptions consume prompt tokens and are treated as ordinary text.
+
+For fine-tuned tool-calling models, pass `--native-tools` to send the MCP tool schemas via the OpenAI `tools` API field instead:
+
+```bash
+python run_planning.py \
+    --tasks tasks/mcpbench_tasks_multi_2server_runner_format.json \
+    --model your-fine-tuned-model \
+    --native-tools
+```
+
+| Mode | How tools reach the model | When to use |
+|------|--------------------------|-------------|
+| Default (prompt text) | Tool names, descriptions, and JSON schemas are embedded as a text block in the user prompt | Any model; baseline experiments |
+| `--native-tools` | Tools are passed in the structured `tools` field of the API request; `tool_choice` is set to `"none"` so the model is aware of them but still responds with text | Fine-tuned tool-calling models; experiments isolating the effect of tool input format |
+
+Under the hood, `--native-tools` calls `MCPConnector.format_tools_for_api(all_tools)` to convert the tool dict to the `[{"type": "function", "function": {...}}]` schema the OpenAI API expects. Tool names are sanitised (`ServerName:tool_name` → `ServerName__tool_name`) to satisfy the API's naming constraint; the planning agent is instructed to use the original colon-separated names in its DAG output.
+
+The mode used is recorded in each output file under `experiment_config.native_tools` so results are self-documenting.
+
+### Structured output (OpenRouter models only)
+
+When running against an OpenRouter model, `PlanOnlyExecutor` automatically passes the dependency graph JSON schema to the API via the `response_format` parameter using OpenRouter's `json_schema` structured output format:
+
+```json
+{
+  "type": "json_schema",
+  "json_schema": {
+    "name": "dependency_graph",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id":          { "type": "string" },
+              "tool":        { "type": "string" },
+              "parameters":  { "type": "object" },
+              "depends_on":  { "type": "array", "items": { "type": "string" } },
+              "description": { "type": "string" }
+            },
+            "required": ["id", "tool", "parameters", "depends_on", "description"]
+          }
+        }
+      },
+      "required": ["nodes"]
+    }
+  }
+}
+```
+
+This applies to both the default (prompt-text) and `--native-tools` modes. For Azure and other non-OpenRouter providers the schema is not sent and JSON parsing falls back to the `clean_and_parse_json` heuristic as before.
+
+---
+
+## Running the Full Benchmark (secondary)
+
+```bash
 source .env
+python run_benchmark.py --list-models
 python run_benchmark.py --models gpt-oss-20b
 
-## single server tasks
-source .env
+# Scoped to specific task files
 python run_benchmark.py --models gpt-oss-20b \
---tasks-file tasks/mcpbench_tasks_single_runner_format.json
-
-## two server tasks
-source .env
-python run_benchmark.py --models gpt-oss-20b \
---tasks-file tasks/mcpbench_tasks_multi_2server_runner_format.json
-
-## three server tasks
-source .env
-python run_benchmark.py --models gpt-oss-20b \
---tasks-file tasks/mcpbench_tasks_multi_3server_runner_format.json
-
+    --tasks-file tasks/mcpbench_tasks_multi_2server_runner_format.json
 ```
 
-### Optional: Add other model providers
+---
 
-To add new models from OpenRouter:
+## Adding a Planning Agent
 
-1. **Find your model on OpenRouter**
-   - Visit [OpenRouter Models](https://openrouter.ai/models) to browse available models
-   - Copy the model ID (e.g., `anthropic/claude-sonnet-4` or `meta-llama/llama-3.3-70b-instruct`)
+All agents — whether planning-only or full executors — share the same interface. The runner injects an LLM provider and a server manager; the agent returns a result dict.
 
-2. **Add the model configuration**
-   - Edit `llm/factory.py` and add your model in the OpenRouter section (around line 152)
-   - Follow this pattern:
-   ```python
-   configs["your-model-name"] = ModelConfig(
-       name="your-model-name",
-       provider_type="openrouter",
-       api_key=os.getenv("OPENROUTER_API_KEY"),
-       base_url="https://openrouter.ai/api/v1",
-       model_name="provider/model-id"  # The exact model ID from OpenRouter
-   )
-   ```
+### 1. Create the agent file
 
-3. **Verify the model is available**
-   ```bash
-   source .env
-   python run_benchmark.py --list-models
-   # Your new model should appear in the list
-   ```
-
-4. **Run benchmark with your model**
-   ```bash
-   source .env
-   python run_benchmark.py --models your-model-name
-   ```
-
-### Optional: Using only OpenRouter API
-
-If you only want to use OpenRouter without Azure:
-
-1. **Set up .env file with only OpenRouter:**
-```bash
-cat > .env << EOF
-OPENROUTER_API_KEY=your_openrouterkey_here
-EOF
-```
-
-2. **Modify the code to access Azure models through OpenRouter:**
-
-Edit `llm/factory.py` and comment out the Azure section (lines 69-101), then add Azure models through OpenRouter instead:
+Place the file under `planning/agents/` for planning agents or `runtime/agents/` for execution agents.
 
 ```python
-# Comment out or remove the Azure section (lines 69-109)
-# if os.getenv("AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_ENDPOINT"):
-#     configs["o4-mini"] = ModelConfig(...)
-#     ...
+# planning/agents/your_agent.py
+import logging
+from typing import Any, Dict, List
 
-# Add Azure models through OpenRouter (in the OpenRouter section around line 106)
-if os.getenv("OPENROUTER_API_KEY"):
-    # Add OpenAI models via OpenRouter
-    configs["gpt-4o"] = ModelConfig(
-        name="gpt-4o",
-        provider_type="openrouter",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        base_url="https://openrouter.ai/api/v1",
-        model_name="openai/gpt-4o"
-    )
-    
-    configs["gpt-4o-mini"] = ModelConfig(
-        name="gpt-4o-mini",
-        provider_type="openrouter",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        base_url="https://openrouter.ai/api/v1",
-        model_name="openai/gpt-4o-mini"
-    )
-    
-    configs["o3"] = ModelConfig(
-        name="o3",
-        provider_type="openrouter",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        base_url="https://openrouter.ai/api/v1",
-        model_name="openai/o3"
-    )
-    
-    configs["o4-mini"] = ModelConfig(
-        name="o4-mini",
-        provider_type="openrouter",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        base_url="https://openrouter.ai/api/v1",
-        model_name="openai/o4-mini"
-    )
+import config.config_loader as config_loader
+from runtime.mcp_modules.connector import MCPConnector
 
-    configs["gpt-5"] = ModelConfig(
-        name="gpt-5",
-        provider_type="openrouter",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
-        base_url="https://openrouter.ai/api/v1",
-        model_name="openai/gpt-5"
-    )
-    
-    
-    # Keep existing OpenRouter models...
+logger = logging.getLogger(__name__)
+
+
+class YourAgent:
+
+    def __init__(self, llm_provider, server_manager) -> None:
+        self.llm = llm_provider
+        self.server_manager = server_manager
+        self.all_tools: Dict[str, Any] = server_manager.all_tools
+
+    async def execute(self, task: str) -> Dict[str, Any]:
+        tool_descriptions = MCPConnector.format_tools_for_prompt(self.all_tools)
+        execution_results: List[Dict[str, Any]] = []
+        total_prompt_tokens = 0
+        total_completion_tokens = 0
+
+        # --- your logic here ---
+
+        response, usage = await self.llm.get_completion(
+            "You are a helpful agent.",
+            f"Task: {task}\n\nTools:\n{tool_descriptions}",
+            config_loader.get_planning_tokens(),
+            return_usage=True,
+        )
+        if usage:
+            total_prompt_tokens     += usage.get("prompt_tokens", 0)
+            total_completion_tokens += usage.get("completion_tokens", 0)
+
+        # -----------------------
+
+        total_tokens = total_prompt_tokens + total_completion_tokens
+        return {
+            "solution":                             response,
+            "total_rounds":                         1,
+            "execution_results":                    execution_results,
+            "planning_json_compliance":             1.0,
+            "accumulated_information":              "",
+            "accumulated_information_uncompressed": "",
+            "total_output_tokens":                  total_completion_tokens,
+            "total_prompt_tokens":                  total_prompt_tokens,
+            "total_tokens":                         total_tokens,
+        }
 ```
 
-This way all models will be accessed through OpenRouter's unified API.
+### 2. What the runner provides
 
+**`self.llm` — LLM provider**
 
-## MCP Servers
-
-MCP-Bench includes 28 diverse MCP servers:
-
-- [BioMCP](https://github.com/genomoncology/biomcp) - Biomedical research data, clinical trials, and health information
-- [Bibliomantic](https://github.com/d4nshields/bibliomantic-mcp-server) - I Ching divination, hexagrams, and mystical guidance
-- [Call for Papers](https://github.com/iremert/call-for-papers-mcp) - Academic conference submissions and call announcements
-- [Car Price Evaluator](https://github.com/yusaaztrk/car-price-mcp-main) - Vehicle valuation and automotive market analysis
-- [Context7](https://github.com/upstash/context7) - Project context management and documentation services
-- [DEX Paprika](https://github.com/coinpaprika/dexpaprika-mcp) - Cryptocurrency DeFi analytics and decentralized exchange data
-- [FruityVice](https://github.com/CelalKhalilov/fruityvice-mcp) - Comprehensive fruit nutrition information and dietary data
-- [Game Trends](https://github.com/halismertkir/game-trends-mcp) - Gaming industry statistics and trend analysis
-- [Google Maps](https://github.com/cablate/mcp-google-map) - Location services, geocoding, and mapping functionality
-- [Huge Icons](https://github.com/hugeicons/mcp-server) - Icon search, management, and design resources
-- [Hugging Face](https://github.com/shreyaskarnik/huggingface-mcp-server) - Machine learning models, datasets, and AI capabilities
-- [Math MCP](https://github.com/EthanHenrickson/math-mcp) - Mathematical calculations and computational operations
-- [Medical Calculator](https://github.com/vitaldb/medcalc) - Clinical calculation tools and medical formulas
-- [Metropolitan Museum](https://github.com/mikechao/metmuseum-mcp) - Art collection database and museum information
-- [Movie Recommender](https://github.com/iremert/movie-recommender-mcp) - Film recommendations and movie metadata
-- [NASA Data](https://github.com/AnCode666/nasa-mcp) - Space mission data and astronomical information
-- [National Parks](https://github.com/KyrieTangSheng/mcp-server-nationalparks) - US National Parks information and visitor services
-- [NixOS](https://github.com/utensils/mcp-nixos) - Package management and system configuration tools
-- [OKX Exchange](https://github.com/esshka/okx-mcp) - Cryptocurrency trading data and market information
-- [OpenAPI Explorer](https://github.com/janwilmake/openapi-mcp-server) - API specification exploration and testing tools
-- [OSINT Intelligence](https://github.com/himanshusanecha/mcp-osint-server) - Open source intelligence gathering and analysis
-- [Paper Search](https://github.com/openags/paper-search-mcp) - Academic paper search across multiple research databases
-- [Reddit](https://github.com/dumyCq/mcp-reddit) - Social media content and community discussions
-- [Scientific Computing](https://github.com/Aman-Amith-Shastry/scientific_computation_mcp) - Advanced mathematical computations and data analysis
-- [Time MCP](https://github.com/dumyCq/time-mcp) - Date, time utilities, and timezone conversions
-- [Unit Converter](https://github.com/zazencodes/unit-converter-mcp) - Measurement conversions across different unit systems
-- [Weather Data](https://github.com/HarunGuclu/weather_mcp) - Weather forecasts and meteorological information
-- [Wikipedia](https://github.com/Rudra-ravi/wikipedia-mcp) - Encyclopedia content search and retrieval
-
-## Project Structure
-
-```
-mcp-bench/
-├── agent/                     # Task execution agents
-│   ├── __init__.py
-│   ├── executor.py           # Multi-round task executor with retry logic
-│   └── execution_context.py  # Execution context management
-├── benchmark/                 # Evaluation framework
-│   ├── __init__.py
-│   ├── evaluator.py          # LLM-as-judge evaluation metrics
-│   ├── runner.py             # Benchmark orchestrator
-│   ├── results_aggregator.py # Results aggregation and statistics
-│   └── results_formatter.py  # Results formatting and display
-├── config/                    # Configuration management
-│   ├── __init__.py
-│   ├── benchmark_config.yaml # Benchmark configuration
-│   └── config_loader.py      # Configuration loader
-├── llm/                       # LLM provider abstractions
-│   ├── __init__.py
-│   ├── factory.py            # Model factory for multiple providers
-│   └── provider.py           # Unified provider interface
-├── mcp_modules/              # MCP server management
-│   ├── __init__.py
-│   ├── connector.py          # Server connection handling
-│   ├── server_manager.py     # Multi-server orchestration
-│   ├── server_manager_persistent.py # Persistent connection manager
-│   └── tool_cache.py         # Tool call caching mechanism
-├── synthesis/                # Task generation
-│   ├── __init__.py
-│   ├── task_synthesis.py     # Task generation with fuzzy conversion
-│   ├── generate_benchmark_tasks.py # Batch task generation script
-│   ├── benchmark_generator.py # Unified benchmark task generator
-│   ├── README.md             # Task synthesis documentation
-│   └── split_combinations/   # Server combination splits
-│       ├── mcp_2server_combinations.json
-│       └── mcp_3server_combinations.json
-├── utils/                    # Utilities
-│   ├── __init__.py
-│   ├── collect_mcp_info.py  # Server discovery and tool collection
-│   ├── local_server_config.py # Local server configuration
-│   └── error_handler.py     # Error handling utilities
-├── tasks/                    # Benchmark task files
-│   ├── mcpbench_tasks_single_runner_format.json
-│   ├── mcpbench_tasks_multi_2server_runner_format.json
-│   └── mcpbench_tasks_multi_3server_runner_format.json
-├── mcp_servers/             # MCP server implementations (28 servers)
-│   ├── api_key              # API keys configuration file
-│   ├── commands.json        # Server command configurations
-│   ├── install.sh          # Installation script for all servers
-│   ├── requirements.txt    # Python dependencies
-│   └── [28 server directories]
-├── cache/                   # Tool call cache directory (auto-created)
-├── run_benchmark.py         # Main benchmark runner script
-├── README.md               # Project documentation
-├── .gitignore              # Git ignore configuration
-└── .gitmodules             # Git submodules configuration
+```python
+response, usage = await self.llm.get_completion(
+    system_prompt,       # str
+    user_prompt,         # str
+    max_tokens,          # int — use config_loader.get_planning_tokens()
+    return_usage=True,   # returns (str, dict) instead of str
+    temperature=0.7,     # optional, ignored for o-series models
+)
+# usage keys: prompt_tokens, completion_tokens, total_tokens
 ```
 
-## Citation
+**`self.all_tools` — available tool schemas**
 
-If you use MCP-Bench in your research, please cite:
+A dict keyed by `"ServerName:tool_name"`. Each value:
+
+```python
+{
+    "server":      "BioMCP",
+    "description": "Retrieve gene annotation from NCBI...",
+    "parameters":  { ... }   # JSON schema
+}
+```
+
+Format all tools for an LLM prompt:
+
+```python
+from runtime.mcp_modules.connector import MCPConnector
+tool_descriptions = MCPConnector.format_tools_for_prompt(self.all_tools)
+```
+
+**`self.server_manager` — tool execution** (only needed for execution agents)
+
+```python
+result = await self.server_manager.call_tool(
+    "BioMCP:gene_getter",             # "ServerName:tool_name"
+    {"gene_id_or_symbol": "BRAF"}     # parameters dict
+)
+```
+
+### 3. Required return fields
+
+```python
+{
+    # Used by the evaluator
+    "solution":                             str,    # agent's final answer or plan
+    "total_rounds":                         int,    # iterations performed
+    "execution_results":                    list,   # tool calls made (see below)
+    "planning_json_compliance":             float,  # 0.0–1.0; set 1.0 if not applicable
+    "accumulated_information":              str,
+    "accumulated_information_uncompressed": str,
+
+    # Token usage
+    "total_output_tokens":                  int,
+    "total_prompt_tokens":                  int,
+    "total_tokens":                         int,
+}
+```
+
+Each entry in `execution_results`:
+
+```python
+{
+    "tool_name":   "BioMCP:gene_getter",
+    "tool_input":  {"gene_id_or_symbol": "BRAF"},
+    "tool_output": { ... },
+    "round":       1,
+}
+```
+
+### 4. Register the agent in `runner.py`
+
+Open `runtime/benchmark/runner.py` and find the executor construction (~line 490). Either swap it directly:
+
+```python
+from planning.agents.your_agent import YourAgent
+executor = YourAgent(llm_provider, conn_mgr.server_manager)
+```
+
+Or add it to the agent registry for CLI-switchable agents:
+
+```python
+AGENT_REGISTRY = {
+    "baseline":   ("runtime.agents.executor",           "TaskExecutor",      True),
+    "langgraph":  ("planning.agents.langgraph_executor", "LangGraphExecutor", False),
+    "your_agent": ("planning.agents.your_agent",         "YourAgent",         False),
+}
+```
+
+Then at the executor construction site:
+
+```python
+import importlib
+
+module_path, class_name, needs_concurrent = AGENT_REGISTRY[self.agent]
+module = importlib.import_module(module_path)
+AgentClass = getattr(module, class_name)
+
+executor = AgentClass(llm_provider, conn_mgr.server_manager) \
+    if not needs_concurrent \
+    else AgentClass(llm_provider, conn_mgr.server_manager, self.concurrent_summarization)
+```
+
+Pass `--agent your_agent` from the CLI and the correct class is loaded at runtime without further code changes.
+
+---
+
+## LLM Configuration
+
+All models are accessed through [OpenRouter](https://openrouter.ai). Set the `OPENROUTER_API_KEY` environment variable and all configured models become available automatically.
+
+To add a model, append an entry to the `openrouter_models` list in `llm/factory.py`:
+
+```python
+("your-short-name", "provider/model-id"),   # exact ID from openrouter.ai/models
+```
+
+The short name is what you pass to `--model`; the second value is the OpenRouter model ID.
+
+---
+
+## Tool Environment (MCP Servers)
+
+Tasks are drawn from an environment of 28 MCP servers spanning diverse domains. Each task specifies which servers are required plus a set of distraction servers, testing the agent's ability to identify relevant tools amid noise.
+
+| Server | Domain |
+|--------|--------|
+| BioMCP | Biomedical research, genes, clinical trials |
+| Paper Search | Academic paper search |
+| Wikipedia | Encyclopaedia content |
+| Weather Data | Forecasts and meteorology |
+| NASA Data | Space missions, astronomical data |
+| Metropolitan Museum | Art collection database |
+| Game Trends | Gaming industry statistics |
+| Math MCP | Mathematical calculations |
+| Time MCP | Date/time utilities (always resident) |
+| Medical Calculator | Clinical calculation tools |
+| Reddit | Social media discussions |
+| Movie Recommender | Film recommendations and metadata |
+| National Parks | US National Parks information |
+| Google Maps | Geocoding and location services |
+| Hugging Face | ML models and datasets |
+| OKX Exchange | Cryptocurrency market data |
+| DEX Paprika | DeFi analytics |
+| Scientific Computing | Advanced maths and data analysis |
+| Unit Converter | Measurement conversions |
+| OpenAPI Explorer | API specification exploration |
+| OSINT Intelligence | Open source intelligence gathering |
+| FruityVice | Fruit nutrition data |
+| Car Price Evaluator | Vehicle valuation |
+| Context7 | Project context and documentation |
+| NixOS | Package management tools |
+| Huge Icons | Icon search and design resources |
+| Call for Papers | Academic conference submissions |
+| Bibliomantic | I Ching divination |
+
+Full server source, documentation, and startup commands are in `mcp_servers/`.
+
+---
+
+## Task Format
+
+Each task entry in `tasks/` has the following structure:
+
+```json
+{
+  "task_id": "paper_search_biomcp_000",
+  "task_description": "1) Use BioMCP:gene_getter to... 2) Search...",
+  "fuzzy_description": "I'm researching BRAF V600E in melanoma...",
+  "dependency_analysis": "Sequential chain: gene_getter → variant_searcher...",
+  "distraction_servers": ["Wikipedia", "Weather Data", "Math MCP"]
+}
+```
+
+- `fuzzy_description` — what the agent sees (natural language)
+- `task_description` — step-by-step ground truth used only by the evaluator
+- `dependency_analysis` — reference DAG structure used for planning evaluation
+
+---
+
+## Based On
+
+This project is a fork of [MCP-Bench](https://arxiv.org/abs/2508.20453) (Wang et al., 2025), a benchmark for evaluating LLM tool-use via the Model Context Protocol.
 
 ```bibtex
 @article{wang2025mcpbench,
@@ -338,12 +480,3 @@ If you use MCP-Bench in your research, please cite:
   year={2025}
 }
 ```
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=accenture/mcp-bench&type=Date)](https://star-history.com/#accenture/mcp-bench&Date)
-
-## Acknowledgments
-
-- Built on the [Model Context Protocol](https://github.com/anthropics/mcp) by Anthropic
-- Thanks to all open-sourced MCP servers implemetation used

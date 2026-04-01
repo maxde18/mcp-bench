@@ -1,371 +1,108 @@
 """LLM Factory Module.
 
-This module handles model configuration and factory creation for different LLM 
-providers, supporting multiple model types and deployment configurations.
+This module handles model configuration and factory creation for OpenRouter
+models, providing a simple interface to list available models and create
+LLMProvider instances.
 
 Classes:
-    ModelConfig: Configuration container for specific models
+    ModelConfig: Configuration container for a specific model
     LLMFactory: Factory for creating LLM provider instances
 """
 
 import os
-from typing import Dict, Any
-from openai import AsyncOpenAI, AsyncAzureOpenAI
+from typing import Dict
+from openai import AsyncOpenAI
 from .provider import LLMProvider
-import config.config_loader as config_loader
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 class ModelConfig:
-    """Configuration container for a specific model.
-    
-    Stores model-specific configuration including provider type,
-    API credentials, and deployment details.
-    
+    """Configuration for a single OpenRouter model.
+
     Attributes:
-        name: Model name identifier
-        provider_type: Type of provider ('azure', 'openai', etc.)
-        config: Dictionary of additional configuration parameters
-        
+        name: Short identifier used as the CLI --model argument
+        model_name: Full OpenRouter model ID (e.g. ``"qwen/qwen3-32b"``)
+
     Example:
-        >>> config = ModelConfig("gpt-4o", "azure", api_key="...", endpoint="...")
+        >>> config = ModelConfig("qwen-3-32b", "qwen/qwen3-32b")
     """
-    
-    def __init__(self, name: str, provider_type: str, **kwargs: Any) -> None:
-        """Initialize model configuration.
-        
-        Args:
-            name: Model name identifier
-            provider_type: Type of provider ('azure', 'openai', etc.)
-            **kwargs: Additional configuration parameters
-        """
+
+    def __init__(self, name: str, model_name: str) -> None:
         self.name: str = name
-        self.provider_type: str = provider_type
-        self.config: Dict[str, Any] = kwargs
+        self.model_name: str = model_name
 
 
 class LLMFactory:
-    """Factory for creating LLM providers for different models.
-    
-    This class manages model configurations and creates appropriate
-    LLM provider instances based on the model type and configuration.
-    
+    """Factory for creating LLM providers for OpenRouter models.
+
+    All models are accessed through the OpenRouter API using the
+    ``OPENROUTER_API_KEY`` environment variable.
+
     Example:
         >>> configs = LLMFactory.get_model_configs()
-        >>> provider = await LLMFactory.create_llm_provider(configs["gpt-4o"])
+        >>> provider = await LLMFactory.create_llm_provider(configs["qwen-3-32b"])
     """
-    
+
     @staticmethod
     def get_model_configs() -> Dict[str, ModelConfig]:
-        """Get all available model configurations from environment variables.
-        
-        Scans environment variables to detect available API keys and endpoints,
-        then creates ModelConfig instances for each available model.
-        
-        Returns:
-            Dictionary mapping model names to ModelConfig instances
-        """
-        configs = {}
-        
-        # Azure OpenAI models
-        if os.getenv("AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_ENDPOINT"):
-            configs["o4-mini"] = ModelConfig(
-                name="o4-mini",
-                provider_type="azure",
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                deployment_name="o4-mini"
-            )
-            
-            configs["gpt-4o"] = ModelConfig(
-                name="gpt-4o",
-                provider_type="azure",
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                deployment_name="gpt-4o"
-            )
-            
-            configs["gpt-4o-mini"] = ModelConfig(
-                name="gpt-4o-mini",
-                provider_type="azure",
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                deployment_name="gpt-4o-mini"
-            )
-            
-            configs["o3"] = ModelConfig(
-                name="o3",
-                provider_type="azure",
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                deployment_name="o3"
-            )
-        
-            configs["gpt-5"] = ModelConfig(
-                name="gpt-5",
-                provider_type="azure",
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                deployment_name="gpt-5"
-            )
-        
-        # OpenRouter models
-        openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
-        if openrouter_api_key:
-            configs["qwen-3-32b"] = ModelConfig(
-                name="qwen-3-32b",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="qwen/qwen3-32b"
-            )
-            
-            configs["qwen3-30b-a3b-instruct-2507"] = ModelConfig(
-                name="qwen3-30b-a3b-instruct-2507",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="qwen/qwen3-30b-a3b-instruct-2507"
-            )
-            
-            configs["qwen3-235b-a22b-thinking-2507"] = ModelConfig(
-                name="qwen3-235b-a22b-thinking-2507",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="qwen/qwen3-235b-a22b-thinking-2507"
-            )
+        """Return all available OpenRouter model configurations.
 
-            configs["qwen3-235b-a22b-2507"] = ModelConfig(
-                name="qwen3-235b-a22b-2507",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="qwen/qwen3-235b-a22b-2507"
-            )
-            
-            configs["gpt-oss-20b"] = ModelConfig(
-                name="gpt-oss-20b",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="openai/gpt-oss-20b"
-            )
-            
-            configs["gpt-oss-120b"] = ModelConfig(
-                name="gpt-oss-120b",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="openai/gpt-oss-120b"
-            )
-            
-            configs["kimi-k2"] = ModelConfig(
-                name="kimi-k2",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="moonshotai/kimi-k2"
-            )
-            
-            configs["minimax-m1"] = ModelConfig(
-                name="minimax-m1",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="minimax/minimax-m1"
-            )
-            
-            configs["nova-micro-v1"] = ModelConfig(
-                name="nova-micro-v1",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="amazon/nova-micro-v1"
-            )
-            
-            configs["grok-3-mini"] = ModelConfig(
-                name="grok-3-mini",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="x-ai/grok-3-mini"
-            )
-            
-            configs["gemini-2.5-flash-lite"] = ModelConfig(
-                name="gemini-2.5-flash-lite",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="google/gemini-2.5-flash-lite"
-            )
-            
-            configs["gpt-5-mini-openrouter"] = ModelConfig(
-                name="gpt-5-mini-openrouter",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="openai/gpt-5-mini"
-            )
-            
-            configs["gpt-5-nano"] = ModelConfig(
-                name="gpt-5-nano",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="openai/gpt-5-nano"
-            )
-            
-            configs["deepseek-r1-0528"] = ModelConfig(
-                name="deepseek-r1-0528",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="deepseek/deepseek-r1-0528"
-            )
-            
-            configs["deepseek-r1-0528-qwen3-8b"] = ModelConfig(
-                name="deepseek-r1-0528-qwen3-8b",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="deepseek/deepseek-r1-0528-qwen3-8b"
-            )
-            
-            configs["ernie-4.5-21b-a3b"] = ModelConfig(
-                name="ernie-4.5-21b-a3b",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="baidu/ernie-4.5-21b-a3b"
-            )
-            
-            configs["glm-4.5-air"] = ModelConfig(
-                name="glm-4.5-air",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="z-ai/glm-4.5-air"
-            )
-            
-            configs["mistral-small-3.2-24b-instruct"] = ModelConfig(
-                name="mistral-small-3.2-24b-instruct",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="mistralai/mistral-small-3.2-24b-instruct"
-            )
-            
-            configs["gemma-3-27b-it"] = ModelConfig(
-                name="gemma-3-27b-it",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="google/gemma-3-27b-it"
-            )
-            
-            configs["qwq-32b"] = ModelConfig(
-                name="qwq-32b",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="qwen/qwq-32b"
-            )
-            
-            configs["glm-4.5"] = ModelConfig(
-                name="glm-4.5",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="z-ai/glm-4.5"
-            )
-            
-            configs["claude-sonnet-4"] = ModelConfig(
-                name="claude-sonnet-4",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="anthropic/claude-sonnet-4"
-            )
-            
-            configs["gemini-2.5-pro"] = ModelConfig(
-                name="gemini-2.5-pro",
-                provider_type="openrouter",
-                api_key=openrouter_api_key,
-                base_url="https://openrouter.ai/api/v1",
-                model_name="google/gemini-2.5-pro"
-            )
-        
-        # Llama models
-        llama_models = [
-            ("llama-4-maverick", "LLAMA_4_MAVERICK"),
-            ("llama-3-2-90b", "LLAMA_3_2_90B"),
-            ("llama-3-3-70b", "LLAMA_3_3_70B"),
-            ("llama-3-1-70b-instruct", "LLAMA_3_1_70B_INSTRUCT"),
-            ("llama-3-1-70b-dev", "LLAMA_3_1_70B_DEV"),
-            ("llama-3-1-8b", "LLAMA_3_1_8B")
+        Models are only included when ``OPENROUTER_API_KEY`` is set.
+
+        Returns:
+            Dictionary mapping short model names to ModelConfig instances.
+        """
+        configs: Dict[str, ModelConfig] = {}
+
+        api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+        if not api_key:
+            return configs
+
+        openrouter_models = [
+            ("qwen-3-32b",                       "qwen/qwen3-32b"),
+            ("qwen3-30b-a3b-instruct-2507",       "qwen/qwen3-30b-a3b-instruct-2507"),
+            ("qwen3-235b-a22b-thinking-2507",     "qwen/qwen3-235b-a22b-thinking-2507"),
+            ("qwen3-235b-a22b-2507",              "qwen/qwen3-235b-a22b-2507"),
+            ("gpt-oss-20b",                       "openai/gpt-oss-20b"),
+            ("gpt-oss-120b",                      "openai/gpt-oss-120b"),
+            ("kimi-k2",                           "moonshotai/kimi-k2"),
+            ("minimax-m1",                        "minimax/minimax-m1"),
+            ("nova-micro-v1",                     "amazon/nova-micro-v1"),
+            ("grok-3-mini",                       "x-ai/grok-3-mini"),
+            ("gemini-2.5-flash-lite",             "google/gemini-2.5-flash-lite"),
+            ("gpt-5-mini",                        "openai/gpt-5-mini"),
+            ("gpt-5-nano",                        "openai/gpt-5-nano"),
+            ("deepseek-r1-0528",                  "deepseek/deepseek-r1-0528"),
+            ("deepseek-r1-0528-qwen3-8b",         "deepseek/deepseek-r1-0528-qwen3-8b"),
+            ("ernie-4.5-21b-a3b",                 "baidu/ernie-4.5-21b-a3b"),
+            ("glm-4.5-air",                       "z-ai/glm-4.5-air"),
+            ("mistral-small-3.2-24b-instruct",    "mistralai/mistral-small-3.2-24b-instruct"),
+            ("gemma-3-27b-it",                    "google/gemma-3-27b-it"),
+            ("qwq-32b",                           "qwen/qwq-32b"),
+            ("glm-4.5",                           "z-ai/glm-4.5"),
+            ("claude-sonnet-4",                   "anthropic/claude-sonnet-4"),
+            ("gemini-2.5-pro",                    "google/gemini-2.5-pro"),
+            ("minimax-m2.7",                      "minimax/minimax-m2.7"),
         ]
-        
-        for model_name, env_prefix in llama_models:
-            api_key = os.getenv(f"{env_prefix}_API_KEY")
-            if api_key:
-                configs[model_name] = ModelConfig(
-                    name=model_name,
-                    provider_type="openai_compatible",
-                    api_key=api_key,
-                    base_url=os.getenv(f"{env_prefix}_BASE_URL"),
-                    model_name=os.getenv(f"{env_prefix}_MODEL")
-                )
-        
+
+        for name, model_name in openrouter_models:
+            configs[name] = ModelConfig(name=name, model_name=model_name)
+
         return configs
-    
+
     @staticmethod
     async def create_llm_provider(model_config: ModelConfig) -> LLMProvider:
-        """Create an LLM provider for the given model configuration.
-        
-        Creates appropriate client and provider instance based on the
-        model configuration's provider type.
-        
+        """Create an LLMProvider for the given model configuration.
+
         Args:
-            model_config: Configuration for the model to create
-            
+            model_config: Configuration for the model to create.
+
         Returns:
-            Configured LLMProvider instance
-            
-        Raises:
-            ValueError: If provider type is not supported
+            Configured LLMProvider instance pointed at OpenRouter.
         """
-        
-        if model_config.provider_type == "azure":
-            client = AsyncAzureOpenAI(
-                azure_endpoint=model_config.config["endpoint"],
-                api_key=model_config.config["api_key"],
-                api_version=config_loader.get_azure_api_version()
-            )
-            return LLMProvider(
-                client=client,
-                deployment_name=model_config.config["deployment_name"],
-                provider_type="azure"
-            )
-            
-        elif model_config.provider_type == "openai_compatible":
-            client = AsyncOpenAI(
-                api_key=model_config.config["api_key"],
-                base_url=model_config.config["base_url"]
-            )
-            return LLMProvider(
-                client=client,
-                deployment_name=model_config.config["model_name"],
-                provider_type="openai_compatible"
-            )
-        elif model_config.provider_type == "openrouter":
-            client = AsyncOpenAI(
-                api_key=model_config.config["api_key"],
-                base_url=model_config.config["base_url"]
-            )
-            return LLMProvider(
-                client=client,
-                deployment_name=model_config.config["model_name"],
-                provider_type="openrouter"
-            )
-        else:
-            raise ValueError(f"Unsupported provider type: {model_config.provider_type}")
+        client = AsyncOpenAI(
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            base_url=OPENROUTER_BASE_URL,
+        )
+        return LLMProvider(client=client, deployment_name=model_config.model_name)

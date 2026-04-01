@@ -59,3 +59,8 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
+
+# Experiment results (large data — keep directory structure, exclude data files)
+results/**/*.json
+results/**/*.jsonl
+!results/**/.gitkeep

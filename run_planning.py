@@ -4,7 +4,6 @@
 Connects to the required MCP servers to collect tool descriptions, passes a
 fuzzy task description to PlanOnlyExecutor, and saves the generated dependency
 graphs. No tools are executed.
-
 Supports multiple repetitions per task and temperature sweeps, producing an
 output structure suitable for DAG stability analysis and anomaly detection.
 
@@ -102,8 +101,9 @@ for _k, _v in os.environ.items():
     if '\r' in _v:
         os.environ[_k] = _v.replace('\r', '')
 
-from agent.plan_only_executor import PlanOnlyExecutor
-from benchmark.runner import BenchmarkRunner, ConnectionManager
+from planning.agents.plan_only_executor import PlanOnlyExecutor
+from runtime.benchmark.runner import BenchmarkRunner
+from mcp_infra.connection_manager import ConnectionManager
 from llm.factory import LLMFactory
 from synthesis.task_synthesis import TaskSynthesizer
 import config.config_loader as config_loader
@@ -159,6 +159,7 @@ async def run(
     repetitions: int,
     task_limit: Optional[int],
     variations: int,
+    native_tools: bool = False,
 ) -> None:
     # ------------------------------------------------------------------
     # LLM provider
@@ -245,11 +246,12 @@ async def run(
                 "model":         model_name,
                 "source":        source_label,
                 "experiment_config": {
-                    "variations":   variations,
-                    "repetitions":  repetitions,
-                    "temperatures": temperatures,
-                    "total_tasks":  len(tasks),
-                    "total_runs":   total_runs,
+                    "variations":    variations,
+                    "repetitions":   repetitions,
+                    "temperatures":  temperatures,
+                    "total_tasks":   len(tasks),
+                    "total_runs":    total_runs,
+                    "native_tools":  native_tools,
                 },
                 "summary": {
                     "successful_runs": successful,
@@ -349,7 +351,9 @@ async def run(
 
                             try:
                                 plan_result = await executor.execute(
-                                    fuzzy_desc, temperature=temperature
+                                    fuzzy_desc,
+                                    temperature=temperature,
+                                    use_native_tools=native_tools,
                                 )
                                 variation_entry["repetitions"].append(
                                     {
@@ -357,6 +361,7 @@ async def run(
                                         "repetition":     rep,
                                         "status":         "success",
                                         "generated_plan": plan_result["dependency_graph"],
+                                        "validation":     plan_result["validation"],
                                         "token_usage": {
                                             "prompt_tokens":     plan_result["prompt_tokens"],
                                             "completion_tokens": plan_result["completion_tokens"],
@@ -470,6 +475,16 @@ def main() -> None:
         default=None,
         help="Limit number of tasks (useful for quick tests).",
     )
+    parser.add_argument(
+        "--native-tools",
+        action="store_true",
+        default=False,
+        help=(
+            "Pass MCP tools via the OpenAI 'tools' API field instead of embedding "
+            "them as text in the prompt.  Recommended for fine-tuned tool-calling "
+            "models.  Defaults to False (prompt-injection mode)."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -479,7 +494,8 @@ def main() -> None:
     # None in the temperatures list means "use model default (no param set)"
     temperatures: List[Optional[float]] = args.temperatures if args.temperatures else [None]
 
-    output_dir = args.output_dir or f"planning_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = args.output_dir or os.path.join("results", "planning", args.model, timestamp)
 
     asyncio.run(
         run(
@@ -491,6 +507,7 @@ def main() -> None:
             args.repetitions,
             args.limit,
             args.variations,
+            native_tools=args.native_tools,
         )
     )
 

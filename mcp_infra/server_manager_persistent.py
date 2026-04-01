@@ -18,8 +18,8 @@ from mcp import ClientSession
 from mcp.client.stdio import stdio_client
 
 import config.config_loader as config_loader
-from mcp_modules.connector import MCPConnector
-from mcp_modules.tool_cache import get_cache
+from mcp_infra.connector import MCPConnector
+from mcp_infra.tool_cache import get_cache
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +243,10 @@ class PersistentMultiServerManager:
                 raise Exception(f"No persistent session found for {server_name}. Call connect_all_servers() first.")
             
             try:
-                result = await session.call_tool(original_tool_name, parameters)
+                raw = await session.call_tool(original_tool_name, parameters)
+                # The MCP SDK returns a CallToolResult Pydantic object via STDIO.
+                # Normalize it to a plain dict so it is JSON-serializable downstream.
+                result = raw.model_dump() if hasattr(raw, "model_dump") else raw
                 logger.debug(f"Tool call successful on persistent session")
             except Exception as e:
                 logger.log(TOOL_CALL_ERROR, f"ERROR in calling tool '{original_tool_name}' on persistent session: {e}")

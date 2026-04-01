@@ -17,7 +17,7 @@ from typing import Any, Dict, List, TypedDict
 from langgraph.graph import END, StateGraph
 
 import config.config_loader as config_loader
-from mcp_modules.connector import MCPConnector
+from mcp_infra.connector import MCPConnector
 
 logger = logging.getLogger(__name__)
 

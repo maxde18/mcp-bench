@@ -362,6 +362,54 @@ class MCPConnector:
                 schema_str = json.dumps(info['input_schema'], indent=2)
                 formatted += f"  Input Schema:\n```json\n{schema_str}\n```\n"
         return formatted
+
+    @staticmethod
+    def _sanitise_tool_name(name: str) -> str:
+        """Convert 'ServerName:tool_name' to an OpenAI-safe function name.
+
+        OpenAI requires tool names to match ^[a-zA-Z0-9_-]{1,64}$.
+        Colons are replaced with '__'; the result is truncated to 64 chars.
+        Use ``unsanitise_tool_name`` to reverse the mapping.
+        """
+        return name.replace(":", "__")[:64]
+
+    @staticmethod
+    def unsanitise_tool_name(safe_name: str) -> str:
+        """Reverse ``_sanitise_tool_name``: '__' → ':'."""
+        return safe_name.replace("__", ":", 1)
+
+    @staticmethod
+    def format_tools_for_api(tools: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Convert all_tools to the OpenAI-compatible ``tools`` array.
+
+        Each entry follows the ``{"type": "function", "function": {...}}``
+        schema accepted by chat.completions.create(tools=...).
+
+        The original ``ServerName:tool_name`` key is preserved in the
+        function description so callers can reconstruct it.  Use
+        ``unsanitise_tool_name`` to map the API-returned function name back.
+
+        Args:
+            tools: Dict keyed by ``"ServerName:tool_name"`` as returned by
+                   PersistentMultiServerManager.all_tools.
+
+        Returns:
+            List of tool dicts ready to pass as ``tools=`` to the OpenAI client.
+        """
+        result = []
+        for name, info in tools.items():
+            safe_name = MCPConnector._sanitise_tool_name(name)
+            description = f"[{info.get('server', 'unknown')}] {info['description']}"
+            parameters = info.get("input_schema") or {"type": "object", "properties": {}}
+            result.append({
+                "type": "function",
+                "function": {
+                    "name": safe_name,
+                    "description": description,
+                    "parameters": parameters,
+                }
+            })
+        return result
     
     @staticmethod
     def estimate_tools_token_count(tools: Dict[str, Any]) -> Dict[str, int]:

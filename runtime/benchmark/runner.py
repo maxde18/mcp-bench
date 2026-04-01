@@ -25,18 +25,17 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 
 # Add parent directory to Python path to resolve imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from openai import AsyncAzureOpenAI
-
-from agent.executor import TaskExecutor
-from agent.langgraph_executor import LangGraphExecutor
-from mcp_modules.server_manager_persistent import PersistentMultiServerManager
+from runtime.agents.executor import TaskExecutor
+from planning.agents.langgraph_executor import LangGraphExecutor
+from mcp_infra.server_manager_persistent import PersistentMultiServerManager
+from mcp_infra.connection_manager import ConnectionManager
 from llm.provider import LLMProvider
 from llm.factory import LLMFactory
-from benchmark.evaluator import TaskEvaluator
-from benchmark.results_aggregator import ResultsAggregator
-from benchmark.results_formatter import ResultsFormatter, execution_results_to_text
+from runtime.benchmark.evaluator import TaskEvaluator
+from runtime.benchmark.results_aggregator import ResultsAggregator
+from runtime.benchmark.results_formatter import ResultsFormatter, execution_results_to_text
 from utils.local_server_config import LocalServerConfigLoader
 import config.config_loader as config_loader
 
@@ -47,103 +46,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class ConnectionManager:
-    """Manages MCP server connections with proper async context management.
-    
-    This class ensures that all MCP server connections are properly established
-    and cleaned up using Python's async context manager protocol. It handles
-    connection lifecycle management and error recovery during cleanup.
-    
-    Attributes:
-        server_configs: List of server configuration dictionaries
-        filter_problematic_tools: Whether to filter out known problematic tools
-        server_manager: Instance of PersistentMultiServerManager
-        all_tools: Dictionary of all available tools from connected servers
-        
-    Example:
-        >>> configs = [{'name': 'server1', 'command': ['python', 'server.py']}]
-        >>> async with ConnectionManager(configs) as conn_mgr:
-        ...     tools = conn_mgr.all_tools
-        ...     # Use tools here
-    """
-    
-    def __init__(
-        self, 
-        server_configs: List[Dict[str, Any]], 
-        filter_problematic_tools: bool = False,
-        server_manager: Optional[PersistentMultiServerManager] = None
-    ) -> None:
-        """Initialize the ConnectionManager.
-        
-        Args:
-            server_configs: List of server configuration dictionaries containing
-                name, command, env, cwd, and other server parameters
-            filter_problematic_tools: If True, filters out known problematic tools
-                that may cause execution issues
-            server_manager: Optional pre-configured server manager instance
-                (if not provided, will create one)
-        """
-        self.server_configs: List[Dict[str, Any]] = server_configs
-        self.filter_problematic_tools: bool = filter_problematic_tools
-        self._injected_server_manager: Optional[PersistentMultiServerManager] = server_manager
-        self.server_manager: Optional[PersistentMultiServerManager] = None
-        self.all_tools: Optional[Dict[str, Any]] = None
-        
-    async def __aenter__(self) -> 'ConnectionManager':
-        """Enter the async context and establish all server connections.
-        
-        Creates a PersistentMultiServerManager instance and connects to all
-        configured servers, discovering their available tools.
-        
-        Returns:
-            Self reference for use in async with statement
-            
-        Raises:
-            ConnectionError: If unable to connect to required servers
-        """
-        # Use injected server manager or create new one
-        self.server_manager = self._injected_server_manager or PersistentMultiServerManager(
-            self.server_configs, 
-            self.filter_problematic_tools
-        )
-        self.all_tools = await self.server_manager.connect_all_servers()
-        return self
-        
-    async def __aexit__(
-        self, 
-        exc_type: Optional[type], 
-        exc_val: Optional[Exception], 
-        exc_tb: Optional[Any]
-    ) -> bool:
-        """Exit the async context and clean up all connections.
-        
-        Ensures all server connections are properly closed, even if errors occur
-        during cleanup. Handles CancelledError gracefully as it's expected during
-        asyncio shutdown.
-        
-        Args:
-            exc_type: Type of exception that occurred, if any
-            exc_val: Exception instance that occurred, if any
-            exc_tb: Exception traceback, if any
-            
-        Returns:
-            False to propagate any exceptions that occurred in the context
-        """
-        if self.server_manager:
-            try:
-                await self.server_manager.close_all_connections()
-            except asyncio.CancelledError:
-                # Ignore cancel error, this is normal behavior during asyncio cleanup
-                logger.debug("Ignoring CancelledError during connection cleanup")
-            except Exception as e:
-                # Other errors only logged, not raised
-                logger.error(f"ERROR in connection cleanup: {e}")
-                import traceback
-                logger.error(f"Full traceback: {traceback.format_exc()}")
-            finally:
-                self.server_manager = None
-                self.all_tools = None
-        return False  # Do not suppress exceptions
+# ConnectionManager is defined in mcp/connection_manager.py and imported above.
+# It is re-exported here so that existing callers of
+# `from runtime.benchmark.runner import ConnectionManager` continue to work.
 
 
 class BenchmarkRunner:
@@ -429,12 +334,9 @@ class BenchmarkRunner:
         
         # Initialize judge provider once for this task execution
         if not hasattr(self, '_judge_provider') or self._judge_provider is None:
-            azure_client = AsyncAzureOpenAI(
-                azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-                api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-                api_version=config_loader.get_azure_api_version()
-            )
-            self._judge_provider = LLMProvider(azure_client, "o4-mini", "azure")
+            model_configs = LLMFactory.get_model_configs()
+            judge_config = model_configs.get("qwen-3-32b") or next(iter(model_configs.values()))
+            self._judge_provider = await LLMFactory.create_llm_provider(judge_config)
         
         # Step 1: Prepare task execution information
         task_execution_info = await self._prepare_task_execution(task_info)
@@ -1272,7 +1174,7 @@ async def main():
     
     # Step 1.5: Initialize cache if enabled
     if args.enable_cache:
-        from mcp_modules.tool_cache import ToolCache, set_cache_instance
+        from mcp_infra.tool_cache import ToolCache, set_cache_instance
         server_whitelist = config_loader.get_cache_server_whitelist()
         cache = ToolCache(
             cache_dir=args.cache_dir,

@@ -116,9 +116,6 @@ class BenchmarkConfig:
                 'token_increment': 1000,
                 'evaluation_max_tokens': 15000
             },
-            'azure': {
-                'api_version': '2024-12-01-preview'
-            },
             'data_collection': {
                 'individual_timeout': 30,
                 'max_retries': 5,
@@ -586,14 +583,6 @@ def get_evaluation_max_tokens() -> int:
         Maximum tokens for evaluation prompts
     """
     return config.get('llm.evaluation_max_tokens', 15000)
-
-def get_azure_api_version() -> str:
-    """Get Azure OpenAI API version.
-    
-    Returns:
-        Azure OpenAI API version string
-    """
-    return config.get('azure.api_version', '2024-12-01-preview')
 
 # Cache configuration functions
 def is_cache_enabled() -> bool:
