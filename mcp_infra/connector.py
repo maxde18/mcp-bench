@@ -379,6 +379,37 @@ class MCPConnector:
         return safe_name.replace("__", ":", 1)
 
     @staticmethod
+    def format_tools_for_minimax_prompt(tools: Dict[str, Any]) -> str:
+        """Format tools as a MiniMax-compatible JSON array for prompt injection.
+
+        MiniMax-M1/M2 was trained with tools described in a specific JSON format
+        (not the OpenAI ``{"type": "function", "function": {...}}`` wrapper).
+        This produces a JSON array matching that format so it can be embedded in
+        the prompt when the model is accessed via an endpoint that does not expose
+        a native tools field (e.g. OpenRouter).
+
+        Tool names use '__' as the server/tool separator so they can be converted
+        back to 'ServerName:tool_name' with ``unsanitise_tool_name``.
+
+        Args:
+            tools: Dict keyed by ``"ServerName:tool_name"`` as returned by
+                   PersistentMultiServerManager.all_tools.
+
+        Returns:
+            JSON-formatted string listing all tools in MiniMax format.
+        """
+        result = []
+        for name, info in tools.items():
+            safe_name = MCPConnector._sanitise_tool_name(name)
+            parameters = dict(info.get("input_schema") or {"type": "object", "properties": {}})
+            result.append({
+                "name": safe_name,
+                "description": f"[{info.get('server', 'unknown')}] {info['description']}",
+                "parameters": parameters,
+            })
+        return json.dumps(result, indent=2)
+
+    @staticmethod
     def format_tools_for_api(tools: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Convert all_tools to the OpenAI-compatible ``tools`` array.
 

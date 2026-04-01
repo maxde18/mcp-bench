@@ -160,6 +160,7 @@ async def run(
     task_limit: Optional[int],
     variations: int,
     native_tools: bool = False,
+    structured_output: bool = False,
 ) -> None:
     # ------------------------------------------------------------------
     # LLM provider
@@ -251,7 +252,8 @@ async def run(
                     "temperatures":  temperatures,
                     "total_tasks":   len(tasks),
                     "total_runs":    total_runs,
-                    "native_tools":  native_tools,
+                    "native_tools":       native_tools,
+                    "structured_output":  structured_output,
                 },
                 "summary": {
                     "successful_runs": successful,
@@ -354,6 +356,7 @@ async def run(
                                     fuzzy_desc,
                                     temperature=temperature,
                                     use_native_tools=native_tools,
+                                    use_structured_output=structured_output,
                                 )
                                 variation_entry["repetitions"].append(
                                     {
@@ -485,6 +488,17 @@ def main() -> None:
             "models.  Defaults to False (prompt-injection mode)."
         ),
     )
+    parser.add_argument(
+        "--structured-output",
+        action="store_true",
+        default=False,
+        help=(
+            "Enforce structured JSON output via response_format (json_schema).  "
+            "Only applies when --native-tools is also set; has no effect in "
+            "prompt-injection mode.  Disabled by default to avoid conflicts with "
+            "native tool definitions on OpenRouter."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -508,6 +522,7 @@ def main() -> None:
             args.limit,
             args.variations,
             native_tools=args.native_tools,
+            structured_output=args.structured_output,
         )
     )
 

@@ -82,16 +82,13 @@ class LangGraphExecutor:
     async def _planner_node(self, state: AgentState) -> AgentState:
         """Generate a full tool dependency graph from tool descriptions and task."""
 
-        tool_descriptions = MCPConnector.format_tools_for_prompt(self.all_tools)
+        api_tools = MCPConnector.format_tools_for_api(self.all_tools)
 
         prompt = f"""You are a planning agent. Given a task and available tools, produce a
 complete execution plan as a dependency graph (DAG).
 
 TASK:
 {state["task"]}
-
-AVAILABLE TOOLS:
-{tool_descriptions}
 
 Return ONLY valid JSON in this exact schema:
 {{
@@ -115,12 +112,17 @@ Rules:
   are resolved at runtime.
 - Only include tools that are actually needed to answer the task.
 - Order nodes so the graph forms a valid DAG (no cycles).
+- In each node's "tool" field use the original "ServerName:tool_name" format
+  (the function names in the tool definitions use "__" instead of ":" — convert
+  back, e.g. "BioMCP__article_search" → "BioMCP:article_search").
 """
 
-        response_data = await self.llm.get_completion(
+        response_data = await self.llm.get_completion_with_tools(
             "You are an expert planning agent that produces tool dependency graphs.",
             prompt,
+            api_tools,
             config_loader.get_planning_tokens(),
+            tool_choice="none",
             return_usage=True,
         )
 

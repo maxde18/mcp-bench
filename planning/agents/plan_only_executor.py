@@ -19,6 +19,11 @@ from planning.validation import validate_dag
 
 logger = logging.getLogger(__name__)
 
+# Model name substrings that identify MiniMax models on OpenRouter.
+# These models do not expose a native tools field via OpenRouter, so tools
+# must be embedded in the prompt using MiniMax's JSON training format.
+_MINIMAX_MODEL_SUBSTRINGS = ("minimax/",)
+
 # Computed once at import time — static data, no need to rebuild per call.
 _FEW_SHOT_BLOCK = format_few_shot_block(EXAMPLES)
 
@@ -119,6 +124,7 @@ class PlannerState(TypedDict):
     original_task: str          # never modified — used as base for retry feedback
     task: str                   # current prompt sent to the planner (may include error feedback)
     use_native_tools: bool
+    use_structured_output: bool
     temperature: Optional[float]
     dependency_graph: Dict[str, Any]
     validation: Dict[str, Any]
@@ -153,6 +159,11 @@ class PlanOnlyExecutor:
         self.llm = llm_provider
         self.all_tools = all_tools
         self.graph = self._build_graph()
+
+    def _is_minimax_model(self) -> bool:
+        """Return True when the LLM is a MiniMax model accessed via OpenRouter."""
+        name = self.llm.deployment_name.lower()
+        return any(sub in name for sub in _MINIMAX_MODEL_SUBSTRINGS)
 
     # ------------------------------------------------------------------
     # Graph construction
@@ -204,6 +215,32 @@ class PlanOnlyExecutor:
                 api_tools,
                 config_loader.get_planning_tokens(),
                 tool_choice="none",
+                return_usage=True,
+                temperature=state["temperature"],
+                response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT if state["use_structured_output"] else None,
+            )
+        elif self._is_minimax_model():
+            # MiniMax models (minimax-m1, minimax-m2.7, …) were trained on a
+            # specific JSON tool format.  OpenRouter does not expose a native
+            # tools field for these models, so we embed the tool list as a JSON
+            # array in the prompt using the MiniMax training format.
+            minimax_tools_json = MCPConnector.format_tools_for_minimax_prompt(self.all_tools)
+            tool_descriptions = "minimax_json"
+            tools_section = (
+                "The available tools are listed below as a JSON array.\n"
+                "Each tool name uses '__' as a separator between server name and tool name\n"
+                "(e.g. 'BioMCP__gene_getter' corresponds to 'BioMCP:gene_getter').\n\n"
+                f"AVAILABLE TOOLS:\n```json\n{minimax_tools_json}\n```"
+            )
+            extra_rules = (
+                '- Use the original colon-separated name (e.g. "BioMCP:gene_getter") in the\n'
+                '  "tool" field of each node — not the double-underscore name.\n'
+            )
+            prompt = _build_planner_prompt(state["task"], tools_section, extra_rules)
+            response_data = await self.llm.get_completion(
+                "You are an expert planning agent that produces tool dependency graphs.",
+                prompt,
+                config_loader.get_planning_tokens(),
                 return_usage=True,
                 temperature=state["temperature"],
                 response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT,
@@ -280,23 +317,28 @@ class PlanOnlyExecutor:
         task: str,
         temperature: Optional[float] = None,
         use_native_tools: bool = False,
+        use_structured_output: bool = False,
         max_retries: int = 3,
     ) -> Dict[str, Any]:
         """Generate a dependency graph for the task and return it.
 
         Args:
-            task:              The fuzzy task description shown to the agent.
-            temperature:       Sampling temperature (0.0–2.0).  None uses the
-                               model default.  Ignored for o-series models.
-            use_native_tools:  When True, MCP tools are passed via the OpenAI
-                               ``tools`` field instead of being embedded as text
-                               in the prompt.  Recommended for fine-tuned
-                               tool-calling models.  Defaults to False.
-            max_retries:       Maximum number of planning attempts.  On each
-                               failed validation the planner is re-invoked with
-                               the validation errors injected into the prompt.
-                               The final attempt is always returned regardless
-                               of validity.  Defaults to 3.
+            task:                   The fuzzy task description shown to the agent.
+            temperature:            Sampling temperature (0.0–2.0).  None uses the
+                                    model default.  Ignored for o-series models.
+            use_native_tools:       When True, MCP tools are passed via the OpenAI
+                                    ``tools`` field instead of being embedded as text
+                                    in the prompt.  Recommended for fine-tuned
+                                    tool-calling models.  Defaults to False.
+            use_structured_output:  When True, ``response_format`` (json_schema) is
+                                    passed to enforce structured output.  Only applies
+                                    when ``use_native_tools`` is also True — has no
+                                    effect in text-embedding mode.  Defaults to False.
+            max_retries:            Maximum number of planning attempts.  On each
+                                    failed validation the planner is re-invoked with
+                                    the validation errors injected into the prompt.
+                                    The final attempt is always returned regardless
+                                    of validity.  Defaults to 3.
 
         Returns:
             {
@@ -310,10 +352,11 @@ class PlanOnlyExecutor:
             }
         """
         initial_state: PlannerState = {
-            "original_task":    task,
-            "task":             task,
-            "use_native_tools": use_native_tools,
-            "temperature":      temperature,
+            "original_task":         task,
+            "task":                  task,
+            "use_native_tools":      use_native_tools,
+            "use_structured_output": use_structured_output,
+            "temperature":           temperature,
             "dependency_graph": {},
             "validation":       {},
             "tool_descriptions": "",

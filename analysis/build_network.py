@@ -56,6 +56,8 @@ def build_ground_truth_graph(task: dict) -> nx.DiGraph:
     """Build a DiGraph from ground_truth.dependency_analysis.tool_chains."""
     G = nx.DiGraph()
     dep = task.get("ground_truth", {}).get("dependency_analysis", {})
+    if not isinstance(dep, dict):
+        return G
     for chain in dep.get("tool_chains", []):
         steps = _parse_chain(chain)
         for i in range(len(steps) - 1):
@@ -106,6 +108,7 @@ def extract_records(planning_results: dict) -> list[dict]:
 
     Each record:
       task_id           str
+      variation_id      int   ← distinguishes fuzz variants of the same task
       fuzzy_description str   ← use as prompt key for groupby
       source            str   ← originating task file
       model             str
@@ -118,12 +121,13 @@ def extract_records(planning_results: dict) -> list[dict]:
     source = planning_results.get("source", "")
     model = planning_results.get("model", "")
 
-    for task in planning_results.get("results", []):
+    for task in planning_results.get("runs", []):
         task_id = task.get("task_id", "")
+        variation_id = task.get("variation_id", 0)
         fuzzy_description = task.get("fuzzy_description", "")
         gt_graph = build_ground_truth_graph(task)
 
-        for run in task.get("runs", []):
+        for run in task.get("repetitions", []):
             if run.get("status") != "success":
                 continue
             generated_plan = run.get("generated_plan")
@@ -132,6 +136,7 @@ def extract_records(planning_results: dict) -> list[dict]:
 
             records.append({
                 "task_id": task_id,
+                "variation_id": variation_id,
                 "fuzzy_description": fuzzy_description,
                 "source": source,
                 "model": model,
@@ -152,10 +157,10 @@ def load_records(json_path: str | Path) -> list[dict]:
 
 
 def load_all_records(directory: str | Path = None) -> list[dict]:
-    """Load all planning_results_*.json files in a directory."""
-    directory = Path(directory or Path(__file__).parent.parent)
+    """Load all *.json files in a directory."""
+    directory = Path(directory or Path(__file__).parent / "agent_plans_json")
     records = []
-    for path in sorted(directory.glob("planning_results_*.json")):
+    for path in sorted(directory.glob("*.json")):
         records.extend(load_records(path))
     return records
 

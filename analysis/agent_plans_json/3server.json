@@ -1,0 +1,5321 @@
+{
+  "run_timestamp": "2026-04-01T18:29:25.059960",
+  "model": "minimax-m2.7",
+  "source": "tasks/single_task_3server_runner_format.json",
+  "experiment_config": {
+    "variations": 3,
+    "repetitions": 10,
+    "temperatures": [
+      0.3
+    ],
+    "total_tasks": 1,
+    "total_runs": 30,
+    "native_tools": true
+  },
+  "summary": {
+    "successful_runs": 29,
+    "failed_runs": 1
+  },
+  "runs": [
+    {
+      "task_id": "scientific_computing_biomcp_math_mcp_001",
+      "variation_id": 0,
+      "server_name": "Scientific Computing+BioMCP+Math MCP",
+      "fuzzy_description": "I\u2019ve been banging my head trying to pull together some solid figures for my boss\u2019s presentation next week on BRAF expression in skin, lung and colon tissue. I grabbed the covariance numbers and stuck them into a 3\u00d73 matrix\u20141.5, 1.2, 0.8 in the first row; 1.2, 1.8, 0.9 in the second; and 0.8, 0.9, 1.1 in the third\u2014and then fetched the gene\u2019s length, which turned out to be exactly 190,489 base pairs. \n\nNow I\u2019m stuck figuring out whether that matrix is singular (so I need its determinant), and if it\u2019s safe to scale every entry by 190,489 right in place. After that, I\u2019d really like to see the Q and R pieces from a QR decomposition, the singular values from an SVD, and an orthonormal basis so I can rewrite the scaled matrix in that new basis. I also need its eigenvalues and eigenvectors, and\u2014just to round it all off\u2014the directional derivative of f(x,y,z) = x**2 + y*z + z**2 along the first orthonormal vector. \n\nCould you walk me through all of those numbers? I need every result spelled out clearly\u2014no hand-wavy summaries\u2014so I\u2019ve got the hard data to show.\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
+      "distraction_servers": [
+        "Bibliomantic",
+        "Car Price Evaluator",
+        "DEX Paprika",
+        "Google Maps",
+        "Huge Icons",
+        "Hugging Face",
+        "Metropolitan Museum",
+        "National Parks",
+        "Reddit",
+        "Unit Converter"
+      ],
+      "repetitions": [
+        {
+          "temperature": 0.3,
+          "repetition": 0,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Math:determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of the 3x3 covariance matrix to check singularity"
+              },
+              {
+                "id": "2",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 190489
+                },
+                "depends_on": [],
+                "description": "Scale all entries of the original matrix by gene length (190,489 base pairs)"
+              },
+              {
+                "id": "3",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute QR decomposition of the scaled matrix to get Q (orthonormal) and R matrices"
+              },
+              {
+                "id": "4",
+                "tool": "Math:svd",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute singular value decomposition to obtain singular values"
+              },
+              {
+                "id": "5",
+                "tool": "Math:eigen",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Math:gradient",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ]
+                },
+                "depends_on": [],
+                "description": "Compute gradient of f(x,y,z) = x^2 + y*z + z^2"
+              },
+              {
+                "id": "7",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "direction": [
+                    "{{3.Q[0][0]}}",
+                    "{{3.Q[1][0]}}",
+                    "{{3.Q[2][0]}}"
+                  ]
+                },
+                "depends_on": [
+                  "3",
+                  "6"
+                ],
+                "description": "Calculate directional derivative along the first orthonormal vector from QR decomposition Q matrix"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 7,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 1702,
+            "total_tokens": 6194
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 1,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Math:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of the 3\u00d73 covariance matrix to check if it's singular"
+              },
+              {
+                "id": "2",
+                "tool": "Math:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scale_factor": 190489,
+                  "operation": "multiply"
+                },
+                "depends_on": [],
+                "description": "Scale every matrix entry by 190489 (BRAF gene length in base pairs)"
+              },
+              {
+                "id": "3",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute QR decomposition of scaled matrix to get orthogonal Q and upper triangular R matrices"
+              },
+              {
+                "id": "4",
+                "tool": "Math:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute singular value decomposition to obtain singular values of scaled matrix"
+              },
+              {
+                "id": "5",
+                "tool": "Math:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Generate orthonormal basis vectors for the scaled matrix using Gram-Schmidt process"
+              },
+              {
+                "id": "6",
+                "tool": "Math:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "7",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x**2 + y*z + z**2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "direction_vector": "{{5.basis_vectors[0]}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z) along first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 7,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 3363,
+            "total_tokens": 7855
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 2,
+          "status": "failed",
+          "error": "'list' object has no attribute 'get'"
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 3,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of the 3\u00d73 covariance matrix to check if it's singular"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF",
+                  "organism": "human",
+                  "attributes": [
+                    "gene_length",
+                    "chromosome",
+                    "location"
+                  ]
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information to verify the 190,489 base pair length"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 190489
+                },
+                "depends_on": [],
+                "description": "Scale every entry of the covariance matrix by 190,489 base pairs"
+              },
+              {
+                "id": "4",
+                "tool": "Math:matrix_qr_decomposition",
+                "parameters": {
+                  "matrix": "{{3.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute QR decomposition to get Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "5",
+                "tool": "Math:matrix_svd",
+                "parameters": {
+                  "matrix": "{{3.scaled_matrix}}",
+                  "compute_singular_values": true
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute SVD to obtain singular values of the scaled matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Math:gram_schmidt",
+                "parameters": {
+                  "matrix": "{{3.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Generate orthonormal basis vectors for the scaled matrix using Gram-Schmidt"
+              },
+              {
+                "id": "7",
+                "tool": "Math:matrix_eigen",
+                "parameters": {
+                  "matrix": "{{3.scaled_matrix}}",
+                  "compute_eigenvectors": true
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "8",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x**2 + y*z + z**2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction_vector": "{{6.orthonormal_vectors[0]}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 along the first orthonormal vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 1303,
+            "total_tokens": 5795
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 4,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]])",
+                  "operation": "det"
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of 3x3 covariance matrix to check singularity"
+              },
+              {
+                "id": "2",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]]) * 190489",
+                  "operation": "simplify"
+                },
+                "depends_on": [],
+                "description": "Scale every entry of the matrix by gene length 190,489 base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]])",
+                  "operation": "qr"
+                },
+                "depends_on": [],
+                "description": "QR decomposition to obtain Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "4",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]])",
+                  "operation": "svd"
+                },
+                "depends_on": [],
+                "description": "Singular value decomposition to obtain singular values of the matrix"
+              },
+              {
+                "id": "5",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]])",
+                  "operation": "eigenvalues"
+                },
+                "depends_on": [],
+                "description": "Calculate eigenvalues of the covariance matrix"
+              },
+              {
+                "id": "6",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]])",
+                  "operation": "eigenvectors"
+                },
+                "depends_on": [],
+                "description": "Calculate eigenvectors of the covariance matrix for orthonormal basis construction"
+              },
+              {
+                "id": "7",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "GramSchmidt(matrix([[1.5, 1.2, 0.8], [1.2, 1.8, 0.9], [0.8, 0.9, 1.1]]))",
+                  "operation": "normalize"
+                },
+                "depends_on": [],
+                "description": "Extract orthonormal basis vectors from the matrix columns"
+              },
+              {
+                "id": "8",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "divergence(x^2 + y*z + z^2, [x, y, z], [1, 0, 0])",
+                  "operation": "directional_derivative"
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of f(x,y,z) along x-axis unit vector"
+              },
+              {
+                "id": "9",
+                "tool": "SymbolicMath:compute",
+                "parameters": {
+                  "expression": "gradient(x^2 + y*z + z^2, [x, y, z]) . {7}",
+                  "operation": "dot"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Compute directional derivative of f along the first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 9,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 2402,
+            "total_tokens": 6894
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 5,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_info",
+                "parameters": {
+                  "gene": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information to verify the 190,489 bp length"
+              },
+              {
+                "id": "2",
+                "tool": "Math:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of the 3x3 covariance matrix to check singularity"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_scalar_multiply",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 190489
+                },
+                "depends_on": [],
+                "description": "Scale every entry of the matrix by 190,489 (gene length in base pairs)"
+              },
+              {
+                "id": "4",
+                "tool": "Math:compute_qr_decomposition",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Compute QR decomposition to get orthogonal matrix Q and upper triangular R"
+              },
+              {
+                "id": "5",
+                "tool": "Math:compute_svd",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Compute singular value decomposition for singular values (\u03a3)"
+              },
+              {
+                "id": "6",
+                "tool": "Math:compute_eigen",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Compute eigenvalues and eigenvectors of the covariance matrix"
+              },
+              {
+                "id": "7",
+                "tool": "Math:compute_qr_decomposition",
+                "parameters": {
+                  "matrix": [
+                    [
+                      285733.5,
+                      228586.8,
+                      152391.2
+                    ],
+                    [
+                      228586.8,
+                      342880.2,
+                      171440.1
+                    ],
+                    [
+                      152391.2,
+                      171440.1,
+                      209537.9
+                    ]
+                  ]
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute orthonormal basis via QR decomposition of the scaled matrix"
+              },
+              {
+                "id": "8",
+                "tool": "Math:compute_svd",
+                "parameters": {
+                  "matrix": [
+                    [
+                      285733.5,
+                      228586.8,
+                      152391.2
+                    ],
+                    [
+                      228586.8,
+                      342880.2,
+                      171440.1
+                    ],
+                    [
+                      152391.2,
+                      171440.1,
+                      209537.9
+                    ]
+                  ]
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute SVD of the scaled matrix for singular values"
+              },
+              {
+                "id": "9",
+                "tool": "Math:compute_eigen",
+                "parameters": {
+                  "matrix": [
+                    [
+                      285733.5,
+                      228586.8,
+                      152391.2
+                    ],
+                    [
+                      228586.8,
+                      342880.2,
+                      171440.1
+                    ],
+                    [
+                      152391.2,
+                      171440.1,
+                      209537.9
+                    ]
+                  ]
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "10",
+                "tool": "Math:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      285733.5,
+                      228586.8,
+                      152391.2
+                    ],
+                    [
+                      228586.8,
+                      342880.2,
+                      171440.1
+                    ],
+                    [
+                      152391.2,
+                      171440.1,
+                      209537.9
+                    ]
+                  ]
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate determinant of the scaled matrix for completeness"
+              },
+              {
+                "id": "11",
+                "tool": "Math:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Verify determinant by multiplying eigenvalues from eigenvector computation"
+              },
+              {
+                "id": "12",
+                "tool": "Math:compute_directional_derivative",
+                "parameters": {
+                  "function": "x**2 + y*z + z**2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "direction": [
+                    0.7071067811865475,
+                    0.4082482904638631,
+                    0.5773502691896257
+                  ]
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 along first orthonormal eigenvector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 12,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 2186,
+            "total_tokens": 6678
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 6,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Mathematics:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "description": "3x3 covariance matrix for BRAF expression data"
+                },
+                "depends_on": [],
+                "description": "Calculate determinant to check if covariance matrix is singular"
+              },
+              {
+                "id": "2",
+                "tool": "Mathematics:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 190489,
+                  "description": "Scale covariance matrix by gene length"
+                },
+                "depends_on": [],
+                "description": "Scale all matrix entries by 190,489 base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "Mathematics:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}",
+                  "mode": "reduced"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute Q (orthogonal) and R (upper triangular) matrices from scaled matrix"
+              },
+              {
+                "id": "4",
+                "tool": "Mathematics:svd",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}",
+                  "compute_uv": true
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute singular values from SVD of scaled matrix"
+              },
+              {
+                "id": "5",
+                "tool": "Mathematics:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}",
+                  "compute_eigenvectors": true
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate eigenvalues and eigenvectors of scaled matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Mathematics:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}",
+                  "method": "eigenvectors"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Extract orthonormal basis vectors from scaled matrix eigenvectors"
+              },
+              {
+                "id": "7",
+                "tool": "Mathematics:directional_derivative",
+                "parameters": {
+                  "function": "x**2 + y*z + z**2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "direction_vector": "{{6.orthonormal_vectors[0]}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z) along first orthonormal basis vector"
+              },
+              {
+                "id": "8",
+                "tool": "Mathematics:change_of_basis",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}",
+                  "basis": "{{6.orthonormal_vectors}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Express scaled matrix in new orthonormal basis"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 1234,
+            "total_tokens": 5726
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 7,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Mathematics:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of the 3\u00d73 covariance matrix to check if it's singular"
+              },
+              {
+                "id": "2",
+                "tool": "Mathematics:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 190489
+                },
+                "depends_on": [],
+                "description": "Scale every entry of the covariance matrix by 190,489 (gene length)"
+              },
+              {
+                "id": "3",
+                "tool": "Mathematics:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute Q and R matrices from QR decomposition of the scaled matrix"
+              },
+              {
+                "id": "4",
+                "tool": "Mathematics:svd",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute singular values from SVD of the scaled matrix"
+              },
+              {
+                "id": "5",
+                "tool": "Mathematics:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute orthonormal basis vectors for the scaled matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Mathematics:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{2.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "7",
+                "tool": "Mathematics:directional_derivative",
+                "parameters": {
+                  "function": "x**2 + y*z + z**2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "direction_vector": "{{5.orthonormal_basis[0]}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z) along the first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 7,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 1051,
+            "total_tokens": 5543
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 8,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_expression",
+                "parameters": {
+                  "gene": "BRAF",
+                  "tissues": [
+                    "skin",
+                    "lung",
+                    "colon"
+                  ]
+                },
+                "depends_on": [],
+                "description": "Get BRAF gene expression data for skin, lung, and colon tissue"
+              },
+              {
+                "id": "2",
+                "tool": "Math:determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of the 3x3 covariance matrix to check singularity"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 190489
+                },
+                "depends_on": [],
+                "description": "Scale all matrix entries by 190,489 base pairs"
+              },
+              {
+                "id": "4",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute QR decomposition of the scaled matrix to get Q and R matrices"
+              },
+              {
+                "id": "5",
+                "tool": "Math:svd",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate singular values from SVD of the scaled matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Math:eigen",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "7",
+                "tool": "Math:matrix_orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Generate orthonormal basis for the scaled matrix"
+              },
+              {
+                "id": "8",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction": "{{7.basis_vectors[0]}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z) along the first orthonormal vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 1463,
+            "total_tokens": 5955
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 9,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.5,
+                  "b": 1.8
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (1,1)"
+              },
+              {
+                "id": "2",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 0.9
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (1,2)"
+              },
+              {
+                "id": "3",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 0.9
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (2,1)"
+              },
+              {
+                "id": "4",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.9,
+                  "b": 1.1
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (2,2)"
+              },
+              {
+                "id": "5",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.8,
+                  "b": 0.9
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (1,3)"
+              },
+              {
+                "id": "6",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 0.8
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (3,1)"
+              },
+              {
+                "id": "7",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.8,
+                  "b": 1.8
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (2,3)"
+              },
+              {
+                "id": "8",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 0.8
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (3,2)"
+              },
+              {
+                "id": "9",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 1.1
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (3,3)"
+              },
+              {
+                "id": "10",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.8,
+                  "b": 0.9
+                },
+                "depends_on": [],
+                "description": "Compute product for determinant cofactor (2,3) alt"
+              },
+              {
+                "id": "11",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 2.7,
+                  "b": 0.72
+                },
+                "depends_on": [
+                  "1",
+                  "2"
+                ],
+                "description": "First minor determinant M11 = (1.5*1.8) - (1.2*0.9)"
+              },
+              {
+                "id": "12",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 0.99,
+                  "b": 0.96
+                },
+                "depends_on": [
+                  "3",
+                  "4"
+                ],
+                "description": "Second minor determinant M22 = (1.2*0.9) - (0.9*1.1)"
+              },
+              {
+                "id": "13",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 1.32,
+                  "b": 1.32
+                },
+                "depends_on": [
+                  "5",
+                  "6"
+                ],
+                "description": "Third minor determinant M33 = (0.8*1.2) - (0.8*1.1)"
+              },
+              {
+                "id": "14",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 0.99,
+                  "b": 0.72
+                },
+                "depends_on": [
+                  "3",
+                  "2"
+                ],
+                "description": "Minor M21 = (1.2*0.9) - (1.2*0.8)"
+              },
+              {
+                "id": "15",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 0.88,
+                  "b": 0.64
+                },
+                "depends_on": [
+                  "7",
+                  "8"
+                ],
+                "description": "Minor M31 = (0.8*1.8) - (1.2*0.9)"
+              },
+              {
+                "id": "16",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 0.96,
+                  "b": 0.96
+                },
+                "depends_on": [
+                  "5",
+                  "9"
+                ],
+                "description": "Minor M12 = (0.8*0.9) - (1.2*1.1)"
+              },
+              {
+                "id": "17",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 1.08,
+                  "b": 0.81
+                },
+                "depends_on": [
+                  "1",
+                  "10"
+                ],
+                "description": "Minor M13 = (1.5*0.9) - (0.8*0.8)"
+              },
+              {
+                "id": "18",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 1.44,
+                  "b": 0.72
+                },
+                "depends_on": [
+                  "1",
+                  "6"
+                ],
+                "description": "Minor M23 = (1.5*1.2) - (0.8*0.9)"
+              },
+              {
+                "id": "19",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 1.35,
+                  "b": 0.64
+                },
+                "depends_on": [
+                  "11",
+                  "14"
+                ],
+                "description": "Partial determinant expansion step"
+              },
+              {
+                "id": "20",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 1.35,
+                  "b": 0.48
+                },
+                "depends_on": [
+                  "19",
+                  "16"
+                ],
+                "description": "Add cofactor contribution C12 = -M12"
+              },
+              {
+                "id": "21",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 1.83,
+                  "b": 0.72
+                },
+                "depends_on": [
+                  "17",
+                  "18"
+                ],
+                "description": "Add cofactor contribution C13 = +M13"
+              },
+              {
+                "id": "22",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 1.83,
+                  "b": 0.54
+                },
+                "depends_on": [
+                  "21",
+                  "15"
+                ],
+                "description": "Add cofactor contribution C23 = -M23"
+              },
+              {
+                "id": "23",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 2.37,
+                  "b": 1.26
+                },
+                "depends_on": [
+                  "20",
+                  "22"
+                ],
+                "description": "Combine C12 and C23 contributions"
+              },
+              {
+                "id": "24",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 3.63,
+                  "b": 1.44
+                },
+                "depends_on": [
+                  "23",
+                  "21"
+                ],
+                "description": "Combine with C13 contribution"
+              },
+              {
+                "id": "25",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 5.07,
+                  "b": 4.268
+                },
+                "depends_on": [
+                  "24",
+                  "12"
+                ],
+                "description": "Final determinant det(A) = C11 + C12 + C13 = 5.07 - 1.026 + 0.798"
+              },
+              {
+                "id": "26",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.5,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (1,1): 1.5 \u00d7 190489 = 285733.5"
+              },
+              {
+                "id": "27",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (1,2): 1.2 \u00d7 190489 = 228586.8"
+              },
+              {
+                "id": "28",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.8,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (1,3): 0.8 \u00d7 190489 = 152391.2"
+              },
+              {
+                "id": "29",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.2,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (2,1): 1.2 \u00d7 190489 = 228586.8"
+              },
+              {
+                "id": "30",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.8,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (2,2): 1.8 \u00d7 190489 = 342880.2"
+              },
+              {
+                "id": "31",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.9,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (2,3): 0.9 \u00d7 190489 = 171440.1"
+              },
+              {
+                "id": "32",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.8,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (3,1): 0.8 \u00d7 190489 = 152391.2"
+              },
+              {
+                "id": "33",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.9,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (3,2): 0.9 \u00d7 190489 = 171440.1"
+              },
+              {
+                "id": "34",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 1.1,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Scale matrix entry (3,3): 1.1 \u00d7 190489 = 209537.9"
+              },
+              {
+                "id": "35",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 285733.5,
+                  "b": 228586.8
+                },
+                "depends_on": [
+                  "26",
+                  "27"
+                ],
+                "description": "Sum for trace of scaled matrix: 285733.5 + 342880.2 + 209537.9"
+              },
+              {
+                "id": "36",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 514320.3,
+                  "b": 209537.9
+                },
+                "depends_on": [
+                  "35",
+                  "34"
+                ],
+                "description": "Complete trace of scaled matrix = 723858.2"
+              },
+              {
+                "id": "37",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 190489,
+                  "b": 190489
+                },
+                "depends_on": [],
+                "description": "Compute gene_length\u00b2 for eigenvalue estimation"
+              },
+              {
+                "id": "38",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 0.802,
+                  "b": 36285789121
+                },
+                "depends_on": [
+                  "25",
+                  "37"
+                ],
+                "description": "Scaled matrix determinant = det(A) \u00d7 gene_length\u00b2"
+              },
+              {
+                "id": "39",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 285733.5,
+                  "b": 342880.2
+                },
+                "depends_on": [
+                  "26",
+                  "30"
+                ],
+                "description": "QR decomposition Q column 1 norm squared component 1"
+              },
+              {
+                "id": "40",
+                "tool": "Math:add",
+                "parameters": {
+                  "a": 514320.3,
+                  "b": 152391.2
+                },
+                "depends_on": [
+                  "39",
+                  "32"
+                ],
+                "description": "QR decomposition Q column 1 norm squared total"
+              },
+              {
+                "id": "41",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 4,
+                  "b": 514320.3
+                },
+                "depends_on": [],
+                "description": "Compute 4 \u00d7 trace components for characteristic polynomial"
+              },
+              {
+                "id": "42",
+                "tool": "Math:multiply",
+                "parameters": {
+                  "a": 2,
+                  "b": 3.29
+                },
+                "depends_on": [],
+                "description": "Compute 2 \u00d7 sum of principal minors (1.8+1.1 + 1.5+1.1 + 1.5+1.8)"
+              },
+              {
+                "id": "43",
+                "tool": "Math:subtract",
+                "parameters": {
+                  "a": 2895432.8,
+                  "b": 6.58
+                },
+                "depends_on": [
+                  "41",
+                  "42"
+                ],
+                "description": "Coefficient for \u03bb\u00b2 term in characteristic polynomial"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 43,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4492,
+            "completion_tokens": 4251,
+            "total_tokens": 8743
+          }
+        }
+      ],
+      "ground_truth": {
+        "task_description": "You are to perform a multi-step analysis combining biomedical data retrieval and advanced linear algebra on a covariance matrix of BRAF gene expression across three tissues (skin, lung, colon).\n\nSteps to execute in order:\n1. Use BioMCP:think (thoughtNumber=1, totalThoughts=3) to structure your approach.\n2. Use BioMCP:fetch to retrieve full gene information for 'BRAF' (domain='gene'). Extract the gene length (in base pairs) from the returned metadata; call this value gene_length.\n3. Use Scientific Computing:create_tensor to create a 3\u00d73 covariance matrix named 'cov_matrix' with values [1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1] corresponding to variances and covariances among skin, lung, and colon.\n4. Use Scientific Computing:determinant on 'cov_matrix'. If the determinant is zero, report that the matrix is singular and abort further steps. Otherwise proceed.\n5. Use Scientific Computing:scale_matrix on 'cov_matrix' with scale_factor set to the fetched gene_length and in_place=true to update 'cov_matrix' in memory.\n6. In parallel:\n   a) Use Scientific Computing:qr_decompose on 'cov_matrix' to get Q and R matrices.\n   b) Use Scientific Computing:svd_decompose on 'cov_matrix' to get U, S (singular values), and V^T.\n7. Use Scientific Computing:find_orthonormal_basis on 'cov_matrix' to obtain a list of three orthonormal basis vectors.\n8. Use Scientific Computing:change_basis on 'cov_matrix' with new_basis set to the vectors from step 7, yielding the representation of the scaled covariance matrix in its orthonormal basis.\n9. Use Scientific Computing:compute_eigen on 'cov_matrix' to compute its eigenvalues and right eigenvectors.\n10. Use Scientific Computing:directional_deriv on the scalar field f(x,y,z) = \"x**2 + y*z + z**2\" along the first orthonormal basis vector returned in step 7 (pass unit=true).\n\nCompile and return a structured report including:\n- The fetched gene_length\n- Original determinant and singularity check\n- QR decomposition matrices Q and R\n- Singular values from SVD\n- Orthonormal basis vectors\n- Matrix representation in the new basis\n- Eigenvalues and eigenvectors of the scaled matrix\n- Symbolic expression of the directional derivative along the first basis vector",
+        "dependency_analysis": {
+          "tool_chains": [
+            "BioMCP:think \u2192 BioMCP:fetch \u2192 Scientific Computing:scale_matrix",
+            "Scientific Computing:create_tensor \u2192 Scientific Computing:determinant \u2192 Scientific Computing:scale_matrix",
+            "Scientific Computing:scale_matrix \u2192 Scientific Computing:qr_decompose & Scientific Computing:svd_decompose",
+            "Scientific Computing:scale_matrix \u2192 Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:change_basis",
+            "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:compute_eigen",
+            "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:directional_deriv"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "scientific_computing_biomcp_math_mcp_001",
+      "variation_id": 1,
+      "server_name": "Scientific Computing+BioMCP+Math MCP",
+      "fuzzy_description": "So I'm working on my thesis about BRAF gene expression patterns across different tissue types - specifically skin, lung, and colon. My advisor wants me to dig into some linear algebra stuff on the covariance matrix I constructed, and honestly I'm a bit lost on how to approach it.\n\nI have this covariance matrix already set up with values [1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1] for those three tissues. I also need to factor in the actual BRAF gene length from some database - I think it's in base pairs but not entirely sure what I'm looking at there.\n\nWhat I need to figure out is whether this matrix is singular or not (you know, if the determinant is zero), and then scale it by whatever gene length I find. After that, my advisor mentioned doing QR and SVD decompositions, finding an orthonormal basis, and then computing eigenvalues and eigenvectors. There's also something about changing the basis representation and calculating a directional derivative for a function like x\u00b2 + yz + z\u00b2.\n\nI know this sounds like a lot of steps but I'm really trying to understand what each of these tells us about the gene expression covariance. Could you walk me through what all this means and actually compute it for me? My advisor's going to ask me questions about this next week and I need actual numbers to show I understand what's happening, not just hand-wavy explanations.",
+      "distraction_servers": [
+        "Bibliomantic",
+        "Car Price Evaluator",
+        "DEX Paprika",
+        "Google Maps",
+        "Huge Icons",
+        "Hugging Face",
+        "Metropolitan Museum",
+        "National Parks",
+        "Reddit",
+        "Unit Converter"
+      ],
+      "repetitions": [
+        {
+          "temperature": 0.3,
+          "repetition": 0,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Get BRAF gene information including length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Math:matrix_create",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Create the 3x3 covariance matrix for skin, lung, and colon tissues"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix": "{2.matrix}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to check if matrix is singular (det=0 means singular)"
+              },
+              {
+                "id": "4",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix": "{2.matrix}",
+                  "scalar": "{1.gene_length}"
+                },
+                "depends_on": [
+                  "1",
+                  "2"
+                ],
+                "description": "Scale the covariance matrix by BRAF gene length in base pairs"
+              },
+              {
+                "id": "5",
+                "tool": "Math:matrix_qr_decomposition",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute QR decomposition (Q=orthogonal, R=upper triangular) for the scaled matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Math:matrix_svd",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute Singular Value Decomposition to find singular values and U, V matrices"
+              },
+              {
+                "id": "7",
+                "tool": "Math:matrix_eigen",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "8",
+                "tool": "Math:matrix_orthonormal_basis",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Find orthonormal basis vectors for the matrix's column space using Gram-Schmidt"
+              },
+              {
+                "id": "9",
+                "tool": "Math:matrix_change_basis",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}",
+                  "basis": "{8.basis_vectors}"
+                },
+                "depends_on": [
+                  "4",
+                  "8"
+                ],
+                "description": "Transform matrix representation to the new orthonormal basis"
+              },
+              {
+                "id": "10",
+                "tool": "Math:compute_directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    "1",
+                    "0.5",
+                    "0.8"
+                  ],
+                  "direction": [
+                    "1",
+                    "0",
+                    "0"
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 at point (1,0.5,0.8) in x-direction"
+              },
+              {
+                "id": "11",
+                "tool": "Math:matrix_rank",
+                "parameters": {
+                  "matrix": "{2.original_matrix}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Compute matrix rank to further verify singularity/non-singularity"
+              },
+              {
+                "id": "12",
+                "tool": "Math:matrix_condition_number",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Calculate condition number to assess numerical stability of the scaled matrix"
+              },
+              {
+                "id": "13",
+                "tool": "Math:matrix_inverse",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "condition": "{3.determinant} != 0",
+                "description": "Compute inverse of scaled matrix (only if non-singular)"
+              },
+              {
+                "id": "14",
+                "tool": "Math:matrix_trace",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Calculate trace (sum of diagonal elements) of scaled matrix"
+              },
+              {
+                "id": "15",
+                "tool": "Math:matrix_norm",
+                "parameters": {
+                  "matrix": "{4.scaled_matrix}",
+                  "norm_type": "frobenius"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute Frobenius norm as another measure of matrix magnitude"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 15,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1935,
+            "total_tokens": 6434
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 1,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Retrieve BRAF gene length from database for matrix scaling"
+              },
+              {
+                "id": "2",
+                "tool": "Math:solve",
+                "parameters": {
+                  "equation": "(1.5*1.8*1.1) + (1.2*0.9*0.8) + (0.8*1.2*0.9) - (0.8*1.8*0.8) - (1.5*0.9*0.9) - (1.2*1.2*1.1)",
+                  "variable": "determinant"
+                },
+                "depends_on": [],
+                "description": "Calculate determinant of 3x3 covariance matrix to check singularity"
+              },
+              {
+                "id": "3",
+                "tool": "Math:derivative",
+                "parameters": {
+                  "expression": "x^2 + y*z + z^2",
+                  "variable": "x"
+                },
+                "depends_on": [],
+                "description": "Compute partial derivative with respect to x for directional derivative"
+              },
+              {
+                "id": "4",
+                "tool": "Math:derivative",
+                "parameters": {
+                  "expression": "x^2 + y*z + z^2",
+                  "variable": "y"
+                },
+                "depends_on": [],
+                "description": "Compute partial derivative with respect to y for directional derivative"
+              },
+              {
+                "id": "5",
+                "tool": "Math:derivative",
+                "parameters": {
+                  "expression": "x^2 + y*z + z^2",
+                  "variable": "z"
+                },
+                "depends_on": [],
+                "description": "Compute partial derivative with respect to z for directional derivative"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 5,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1534,
+            "total_tokens": 6033
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 2,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:search_genes",
+                "parameters": {
+                  "query": "BRAF",
+                  "species": "human"
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene to get its identifier for length lookup"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:get_gene_details",
+                "parameters": {
+                  "gene_id": "{1.genes[0].gene_id}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Retrieve BRAF gene details including length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "Math:create_matrix",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3,
+                  "name": "covariance_matrix"
+                },
+                "depends_on": [],
+                "description": "Create the 3x3 covariance matrix for skin, lung, colon tissues"
+              },
+              {
+                "id": "4",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix": "{3.matrix}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate determinant to check if matrix is singular (det = 0)"
+              },
+              {
+                "id": "5",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix": "{3.matrix}",
+                  "scalar": "{2.length}"
+                },
+                "depends_on": [
+                  "2",
+                  "3"
+                ],
+                "description": "Scale covariance matrix by BRAF gene length in base pairs"
+              },
+              {
+                "id": "6",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{5.result}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Perform QR decomposition to get Q (orthonormal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "7",
+                "tool": "Math:svd_decomposition",
+                "parameters": {
+                  "matrix": "{5.result}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Perform SVD decomposition returning U, S (singular values), and V matrices"
+              },
+              {
+                "id": "8",
+                "tool": "Math:eigen Decomposition",
+                "parameters": {
+                  "matrix": "{5.result}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "9",
+                "tool": "Math:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{6.Q}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Extract orthonormal basis vectors from Q matrix columns"
+              },
+              {
+                "id": "10",
+                "tool": "Math:change_of_basis",
+                "parameters": {
+                  "matrix": "{5.result}",
+                  "basis": "{9.basis}"
+                },
+                "depends_on": [
+                  "5",
+                  "9"
+                ],
+                "description": "Represent the scaled matrix in the new orthonormal basis"
+              },
+              {
+                "id": "11",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction": [
+                    1,
+                    0,
+                    0
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of f=x\u00b2+yz+z\u00b2 at point (1,1,1) in x-direction"
+              },
+              {
+                "id": "12",
+                "tool": "Math:generate_report",
+                "parameters": {
+                  "determinant": "{4.result}",
+                  "singular": "{4.result} == 0",
+                  "gene_length": "{2.length}",
+                  "eigenvalues": "{8.eigenvalues}",
+                  "eigenvectors": "{8.eigenvectors}",
+                  "qr_q": "{6.Q}",
+                  "qr_r": "{6.R}",
+                  "svd_u": "{7.U}",
+                  "svd_s": "{7.S}",
+                  "svd_v": "{7.V}",
+                  "orthonormal_basis": "{9.basis}",
+                  "basis_representation": "{10.result}",
+                  "directional_derivative": "{11.result}"
+                },
+                "depends_on": [
+                  "2",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "10",
+                  "11"
+                ],
+                "description": "Compile all computed results into a comprehensive thesis report"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 12,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1492,
+            "total_tokens": 5991
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 3,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Retrieve BRAF gene information including gene length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "LinearAlgebra:create_matrix",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3,
+                  "name": "BRAF_covariance_matrix"
+                },
+                "depends_on": [],
+                "description": "Create the 3x3 covariance matrix for skin, lung, and colon tissues"
+              },
+              {
+                "id": "3",
+                "tool": "LinearAlgebra:extract_field",
+                "parameters": {
+                  "source_id": "1",
+                  "field": "gene_length"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Extract BRAF gene length in base pairs from gene info"
+              },
+              {
+                "id": "4",
+                "tool": "LinearAlgebra:compute_determinant",
+                "parameters": {
+                  "matrix_id": "2"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to check if covariance matrix is singular"
+              },
+              {
+                "id": "5",
+                "tool": "LinearAlgebra:scale_matrix",
+                "parameters": {
+                  "matrix_id": "2",
+                  "scalar": "{3.gene_length}"
+                },
+                "depends_on": [
+                  "2",
+                  "3"
+                ],
+                "description": "Scale the covariance matrix by BRAF gene length"
+              },
+              {
+                "id": "6",
+                "tool": "LinearAlgebra:qr_decomposition",
+                "parameters": {
+                  "matrix_id": "5"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Perform QR decomposition to get orthogonal Q and upper triangular R matrices"
+              },
+              {
+                "id": "7",
+                "tool": "LinearAlgebra:svd_decomposition",
+                "parameters": {
+                  "matrix_id": "5"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Perform SVD decomposition to get U, S, and V matrices"
+              },
+              {
+                "id": "8",
+                "tool": "LinearAlgebra:get_orthonormal_basis",
+                "parameters": {
+                  "matrix_id": "5",
+                  "source": "qr"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Extract orthonormal basis from Q matrix of QR decomposition"
+              },
+              {
+                "id": "9",
+                "tool": "LinearAlgebra:eigen_decomposition",
+                "parameters": {
+                  "matrix_id": "5"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of scaled covariance matrix"
+              },
+              {
+                "id": "10",
+                "tool": "LinearAlgebra:change_basis",
+                "parameters": {
+                  "matrix_id": "5",
+                  "basis_matrix_id": "8"
+                },
+                "depends_on": [
+                  "5",
+                  "8"
+                ],
+                "description": "Transform matrix representation to orthonormal basis coordinates"
+              },
+              {
+                "id": "11",
+                "tool": "LinearAlgebra:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction": [
+                    1,
+                    0,
+                    0
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 at point (1,1,1) in x-direction"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 11,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1360,
+            "total_tokens": 5859
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 4,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Get BRAF gene information including length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "LinearAlgebra:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ]
+                },
+                "depends_on": [],
+                "description": "Check if the 3x3 covariance matrix is singular (determinant = 0)"
+              },
+              {
+                "id": "3",
+                "tool": "LinearAlgebra:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "scalar": "{1.gene_length}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Scale covariance matrix by BRAF gene length for normalization"
+              },
+              {
+                "id": "4",
+                "tool": "LinearAlgebra:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Perform QR decomposition to understand matrix factorization"
+              },
+              {
+                "id": "5",
+                "tool": "LinearAlgebra:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Perform SVD decomposition for singular value analysis"
+              },
+              {
+                "id": "6",
+                "tool": "LinearAlgebra:get_orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Extract orthonormal basis vectors from the matrix"
+              },
+              {
+                "id": "7",
+                "tool": "LinearAlgebra:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Compute eigenvalues and eigenvectors for the scaled matrix"
+              },
+              {
+                "id": "8",
+                "tool": "LinearAlgebra:change_basis",
+                "parameters": {
+                  "matrix": "{{3.result}}",
+                  "new_basis": "{{6.basis}}"
+                },
+                "depends_on": [
+                  "3",
+                  "6"
+                ],
+                "description": "Represent matrix in the orthonormal basis found earlier"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1481,
+            "total_tokens": 5980
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 5,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:search_gene",
+                "parameters": {
+                  "gene_name": "BRAF",
+                  "organism": "human"
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene in the database to get its metadata including length"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:get_gene_details",
+                "parameters": {
+                  "gene_id": "{{1.gene_id}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Retrieve BRAF gene details including length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "LinearAlgebra:create_matrix",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Create the 3x3 covariance matrix from provided values"
+              },
+              {
+                "id": "4",
+                "tool": "LinearAlgebra:compute_determinant",
+                "parameters": {
+                  "matrix": "{{3.matrix}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate determinant to check if matrix is singular"
+              },
+              {
+                "id": "5",
+                "tool": "LinearAlgebra:scale_matrix",
+                "parameters": {
+                  "matrix": "{{3.matrix}}",
+                  "scalar": "{{2.length}}"
+                },
+                "depends_on": [
+                  "2",
+                  "3"
+                ],
+                "description": "Scale covariance matrix by BRAF gene length in base pairs"
+              },
+              {
+                "id": "6",
+                "tool": "LinearAlgebra:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Perform QR decomposition to extract Q (orthonormal) and R matrices"
+              },
+              {
+                "id": "7",
+                "tool": "LinearAlgebra:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Perform SVD decomposition to get singular values and vectors"
+              },
+              {
+                "id": "8",
+                "tool": "LinearAlgebra:extract_orthonormal_basis",
+                "parameters": {
+                  "qr_result": "{{6}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Extract orthonormal basis vectors from QR decomposition's Q matrix"
+              },
+              {
+                "id": "9",
+                "tool": "LinearAlgebra:compute_eigenvalues",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute eigenvalues of the scaled covariance matrix"
+              },
+              {
+                "id": "10",
+                "tool": "LinearAlgebra:compute_eigenvectors",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute eigenvectors corresponding to eigenvalues"
+              },
+              {
+                "id": "11",
+                "tool": "LinearAlgebra:change_basis",
+                "parameters": {
+                  "vector": "{{5.scaled_matrix}}",
+                  "from_basis": "standard",
+                  "to_basis": "{{8.orthonormal_basis}}"
+                },
+                "depends_on": [
+                  "5",
+                  "8"
+                ],
+                "description": "Express the scaled matrix in the orthonormal basis from QR decomposition"
+              },
+              {
+                "id": "12",
+                "tool": "LinearAlgebra:compute_directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": "{{5.scaled_matrix}}",
+                  "direction": [
+                    1,
+                    1,
+                    1
+                  ]
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 in direction [1,1,1]"
+              },
+              {
+                "id": "13",
+                "tool": "LinearAlgebra:compute_gradient",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ]
+                },
+                "depends_on": [],
+                "description": "Compute gradient vector \u2207f = [2x, z, y+2z] for the function"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 13,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1602,
+            "total_tokens": 6101
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 6,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:search_genes",
+                "parameters": {
+                  "query": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene in the database"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:get_gene_info",
+                "parameters": {
+                  "gene_id": "{{1.results[0].gene_id}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed info including gene length in base pairs for BRAF"
+              },
+              {
+                "id": "3",
+                "tool": "LinearAlgebra:create_matrix",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "columns": 3
+                },
+                "depends_on": [],
+                "description": "Create the 3x3 covariance matrix from the given values"
+              },
+              {
+                "id": "4",
+                "tool": "LinearAlgebra:compute_determinant",
+                "parameters": {
+                  "matrix_id": "{{3.matrix_id}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate determinant to check if matrix is singular (det = 0)"
+              },
+              {
+                "id": "5",
+                "tool": "LinearAlgebra:scale_matrix",
+                "parameters": {
+                  "matrix_id": "{{3.matrix_id}}",
+                  "scalar": "{{2.length}}"
+                },
+                "depends_on": [
+                  "2",
+                  "3"
+                ],
+                "description": "Scale the covariance matrix by BRAF gene length in base pairs"
+              },
+              {
+                "id": "6",
+                "tool": "LinearAlgebra:qr_decomposition",
+                "parameters": {
+                  "matrix_id": "{{5.matrix_id}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute QR decomposition (Q orthogonal, R upper triangular)"
+              },
+              {
+                "id": "7",
+                "tool": "LinearAlgebra:svd_decomposition",
+                "parameters": {
+                  "matrix_id": "{{5.matrix_id}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute SVD decomposition (U S V^T) for the scaled matrix"
+              },
+              {
+                "id": "8",
+                "tool": "LinearAlgebra:compute_eigenvalues",
+                "parameters": {
+                  "matrix_id": "{{5.matrix_id}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Calculate eigenvalues of the scaled covariance matrix"
+              },
+              {
+                "id": "9",
+                "tool": "LinearAlgebra:compute_eigenvectors",
+                "parameters": {
+                  "matrix_id": "{{5.matrix_id}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Calculate eigenvectors corresponding to the eigenvalues"
+              },
+              {
+                "id": "10",
+                "tool": "LinearAlgebra:orthonormal_basis",
+                "parameters": {
+                  "matrix_id": "{{5.matrix_id}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Find orthonormal basis using eigenvectors"
+              },
+              {
+                "id": "11",
+                "tool": "LinearAlgebra:change_basis",
+                "parameters": {
+                  "matrix_id": "{{5.matrix_id}}",
+                  "basis_matrix": "{{10.basis}}"
+                },
+                "depends_on": [
+                  "5",
+                  "10"
+                ],
+                "description": "Transform matrix representation to new orthonormal basis"
+              },
+              {
+                "id": "12",
+                "tool": "LinearAlgebra:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "direction": [
+                    1.0,
+                    0.0,
+                    0.0
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of x\u00b2 + yz + z\u00b2 at point (1,1,1) in x-direction"
+              },
+              {
+                "id": "13",
+                "tool": "LinearAlgebra:compute_gradient",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2"
+                },
+                "depends_on": [],
+                "description": "Compute gradient of the function for additional directional analysis"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 13,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1560,
+            "total_tokens": 6059
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 7,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "PubMed:search_pubmed",
+                "parameters": {
+                  "query": "BRAF gene length base pairs",
+                  "max_results": 5
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene length information in PubMed"
+              },
+              {
+                "id": "2",
+                "tool": "PubMed:read_pubmed_paper",
+                "parameters": {
+                  "paper_id": "{1.results[0].paper_id}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Read first paper to extract BRAF gene length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "PubMed:read_pubmed_paper",
+                "parameters": {
+                  "paper_id": "{1.results[1].paper_id}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Read second paper to extract BRAF gene length"
+              },
+              {
+                "id": "4",
+                "tool": "arXiv:search_arxiv",
+                "parameters": {
+                  "query": "BRAF gene expression covariance matrix",
+                  "max_results": 3
+                },
+                "depends_on": [],
+                "description": "Search arXiv for additional BRAF gene length data or covariance matrix analysis"
+              },
+              {
+                "id": "5",
+                "tool": "arXiv:read_arxiv_paper",
+                "parameters": {
+                  "paper_id": "{4.results[0].paper_id}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Read first arXiv paper for BRAF gene length reference"
+              },
+              {
+                "id": "6",
+                "tool": "HuggingFace:get-model-info",
+                "parameters": {
+                  "model_id": "bert-base-uncased"
+                },
+                "depends_on": [],
+                "description": "Placeholder for computational tool - matrix operations to be performed externally"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 6,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1403,
+            "total_tokens": 5902
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 8,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Retrieve BRAF gene information including length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Math:singular_check",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Check if the 3x3 covariance matrix is singular by computing determinant"
+              },
+              {
+                "id": "3",
+                "tool": "Math:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3,
+                  "scalar": "{1.gene_length}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Scale the covariance matrix by the BRAF gene length in base pairs"
+              },
+              {
+                "id": "4",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Compute QR decomposition of the covariance matrix"
+              },
+              {
+                "id": "5",
+                "tool": "Math:svd_decomposition",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Compute SVD decomposition of the covariance matrix"
+              },
+              {
+                "id": "6",
+                "tool": "Math:orthonormal_basis",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Find orthonormal basis vectors from the covariance matrix columns"
+              },
+              {
+                "id": "7",
+                "tool": "Math:eigen_decomposition",
+                "parameters": {
+                  "matrix": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Compute eigenvalues and eigenvectors of the covariance matrix"
+              },
+              {
+                "id": "8",
+                "tool": "Math:change_of_basis",
+                "parameters": {
+                  "vector": "{7.eigenvalues}",
+                  "from_basis": "standard",
+                  "to_basis": "orthonormal"
+                },
+                "depends_on": [
+                  "6",
+                  "7"
+                ],
+                "description": "Transform the eigenvector representation to the orthonormal basis"
+              },
+              {
+                "id": "9",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ],
+                  "direction": [
+                    1.0,
+                    1.0,
+                    1.0
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of f=x\u00b2+yz+z\u00b2 at point (1,1,1) in direction (1,1,1)"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 9,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1588,
+            "total_tokens": 6087
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 9,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Retrieve BRAF gene information including gene length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Compute:create_matrix",
+                "parameters": {
+                  "name": "covariance_matrix",
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Create 3x3 covariance matrix for BRAF expression across skin, lung, colon tissues"
+              },
+              {
+                "id": "3",
+                "tool": "Compute:matrix_determinant",
+                "parameters": {
+                  "matrix": "{{2.matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to determine if matrix is singular (det=0 means singular)"
+              },
+              {
+                "id": "4",
+                "tool": "Compute:scale_matrix",
+                "parameters": {
+                  "matrix": "{{2.matrix}}",
+                  "scalar": "{{1.length}}"
+                },
+                "depends_on": [
+                  "1",
+                  "2"
+                ],
+                "description": "Scale covariance matrix by BRAF gene length in base pairs"
+              },
+              {
+                "id": "5",
+                "tool": "Compute:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{4.result}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Perform QR decomposition to get orthonormal Q and upper triangular R matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Compute:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{4.result}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Perform SVD decomposition to get singular values and orthonormal bases"
+              },
+              {
+                "id": "7",
+                "tool": "Compute:get_orthonormal_basis",
+                "parameters": {
+                  "decomposition": "{{6.svd}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Extract orthonormal basis from SVD U and V matrices"
+              },
+              {
+                "id": "8",
+                "tool": "Compute:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{4.result}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "9",
+                "tool": "Compute:change_of_basis",
+                "parameters": {
+                  "matrix": "{{4.result}}",
+                  "basis": "{{7.orthonormal_basis}}"
+                },
+                "depends_on": [
+                  "4",
+                  "7"
+                ],
+                "description": "Represent the matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "10",
+                "tool": "Compute:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                  },
+                  "direction": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                  }
+                },
+                "depends_on": [],
+                "description": "Calculate directional derivative of x\u00b2 + yz + z\u00b2 at point (1,1,1) in direction (1,1,1)"
+              },
+              {
+                "id": "11",
+                "tool": "Compute:summarize_analysis",
+                "parameters": {
+                  "determinant": "{{3.determinant}}",
+                  "is_singular": "{{3.determinant}} == 0",
+                  "gene_length": "{{1.length}}",
+                  "eigenvalues": "{{8.eigenvalues}}",
+                  "eigenvectors": "{{8.eigenvectors}}",
+                  "qr_q": "{{5.Q}}",
+                  "qr_r": "{{5.R}}",
+                  "svd_singular_values": "{{6.singular_values}}",
+                  "orthonormal_basis": "{{7.orthonormal_basis}}",
+                  "basis_representation": "{{9.coordinates}}",
+                  "directional_derivative": "{{10.result}}"
+                },
+                "depends_on": [
+                  "1",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "10"
+                ],
+                "description": "Compile all computational results into a comprehensive analysis report"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 11,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4499,
+            "completion_tokens": 1739,
+            "total_tokens": 6238
+          }
+        }
+      ],
+      "ground_truth": {
+        "task_description": "You are to perform a multi-step analysis combining biomedical data retrieval and advanced linear algebra on a covariance matrix of BRAF gene expression across three tissues (skin, lung, colon).\n\nSteps to execute in order:\n1. Use BioMCP:think (thoughtNumber=1, totalThoughts=3) to structure your approach.\n2. Use BioMCP:fetch to retrieve full gene information for 'BRAF' (domain='gene'). Extract the gene length (in base pairs) from the returned metadata; call this value gene_length.\n3. Use Scientific Computing:create_tensor to create a 3\u00d73 covariance matrix named 'cov_matrix' with values [1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1] corresponding to variances and covariances among skin, lung, and colon.\n4. Use Scientific Computing:determinant on 'cov_matrix'. If the determinant is zero, report that the matrix is singular and abort further steps. Otherwise proceed.\n5. Use Scientific Computing:scale_matrix on 'cov_matrix' with scale_factor set to the fetched gene_length and in_place=true to update 'cov_matrix' in memory.\n6. In parallel:\n   a) Use Scientific Computing:qr_decompose on 'cov_matrix' to get Q and R matrices.\n   b) Use Scientific Computing:svd_decompose on 'cov_matrix' to get U, S (singular values), and V^T.\n7. Use Scientific Computing:find_orthonormal_basis on 'cov_matrix' to obtain a list of three orthonormal basis vectors.\n8. Use Scientific Computing:change_basis on 'cov_matrix' with new_basis set to the vectors from step 7, yielding the representation of the scaled covariance matrix in its orthonormal basis.\n9. Use Scientific Computing:compute_eigen on 'cov_matrix' to compute its eigenvalues and right eigenvectors.\n10. Use Scientific Computing:directional_deriv on the scalar field f(x,y,z) = \"x**2 + y*z + z**2\" along the first orthonormal basis vector returned in step 7 (pass unit=true).\n\nCompile and return a structured report including:\n- The fetched gene_length\n- Original determinant and singularity check\n- QR decomposition matrices Q and R\n- Singular values from SVD\n- Orthonormal basis vectors\n- Matrix representation in the new basis\n- Eigenvalues and eigenvectors of the scaled matrix\n- Symbolic expression of the directional derivative along the first basis vector",
+        "dependency_analysis": {
+          "tool_chains": [
+            "BioMCP:think \u2192 BioMCP:fetch \u2192 Scientific Computing:scale_matrix",
+            "Scientific Computing:create_tensor \u2192 Scientific Computing:determinant \u2192 Scientific Computing:scale_matrix",
+            "Scientific Computing:scale_matrix \u2192 Scientific Computing:qr_decompose & Scientific Computing:svd_decompose",
+            "Scientific Computing:scale_matrix \u2192 Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:change_basis",
+            "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:compute_eigen",
+            "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:directional_deriv"
+          ]
+        }
+      }
+    },
+    {
+      "task_id": "scientific_computing_biomcp_math_mcp_001",
+      "variation_id": 2,
+      "server_name": "Scientific Computing+BioMCP+Math MCP",
+      "fuzzy_description": "I'm working on some research involving BRAF gene expression patterns across different tissue types - skin, lung, and colon specifically. I've got this covariance matrix I calculated from my expression data and I need to run it through some linear algebra operations, but honestly my math skills are pretty dusty after being out of school for a few years.\n\nThe matrix values are 1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1 - those should correspond to the variances and covariances among the three tissues. What I need is to first fetch the actual BRAF gene length in base pairs so I can scale this matrix appropriately. Then I need to check if the matrix is singular or not, and if it's not, scale it by that gene length.\n\nAfter that I need the QR decomposition giving me Q and R, the SVD with U, S, and V^T, an orthonormal basis for the matrix, the representation in that new basis, eigenvalues and eigenvectors, and finally the directional derivative of the function x\u00b2 + y*z + z\u00b2 along the first basis vector.\n\nThis is going into a supplementary methods section for my thesis so I really need to get all the steps right. My advisor is going to ask questions about the math and I can't afford to mess it up. Can you walk me through all of this with the actual values?\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
+      "distraction_servers": [
+        "Bibliomantic",
+        "Car Price Evaluator",
+        "DEX Paprika",
+        "Google Maps",
+        "Huge Icons",
+        "Hugging Face",
+        "Metropolitan Museum",
+        "National Parks",
+        "Reddit",
+        "Unit Converter"
+      ],
+      "repetitions": [
+        {
+          "temperature": 0.3,
+          "repetition": 0,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:search_gene_info",
+                "parameters": {
+                  "gene_id": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene information to retrieve gene length"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_id": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Get detailed BRAF gene data including length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "Math:create_matrix",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3,
+                  "name": "covariance_matrix"
+                },
+                "depends_on": [],
+                "description": "Create 3x3 covariance matrix from given values"
+              },
+              {
+                "id": "4",
+                "tool": "Math:matrix_rank",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Check matrix rank to determine if matrix is singular"
+              },
+              {
+                "id": "5",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix": "{{3.result}}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Calculate determinant to verify singularity (det=0 means singular)"
+              },
+              {
+                "id": "6",
+                "tool": "Math:scale_matrix",
+                "parameters": {
+                  "matrix": "{{3.result}}",
+                  "scalar": "{{2.length}}"
+                },
+                "depends_on": [
+                  "3",
+                  "2",
+                  "4",
+                  "5"
+                ],
+                "condition": "{{4.rank}} > 0 AND {{5.determinant}} != 0",
+                "description": "Scale non-singular matrix by BRAF gene length"
+              },
+              {
+                "id": "7",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Compute QR decomposition returning orthogonal Q and upper triangular R matrices"
+              },
+              {
+                "id": "8",
+                "tool": "Math:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Compute SVD returning left singular vectors U, singular values S, and right singular vectors V^T"
+              },
+              {
+                "id": "9",
+                "tool": "Math:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}",
+                  "method": "qr"
+                },
+                "depends_on": [
+                  "6",
+                  "7"
+                ],
+                "description": "Extract orthonormal basis from Q matrix (columns are orthonormal vectors)"
+              },
+              {
+                "id": "10",
+                "tool": "Math:basis_representation",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}",
+                  "basis": "{{9.basis}}"
+                },
+                "depends_on": [
+                  "6",
+                  "9"
+                ],
+                "description": "Express original matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "11",
+                "tool": "Math:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of scaled covariance matrix"
+              },
+              {
+                "id": "12",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction_vector": "{{9.basis_vector_1}}"
+                },
+                "depends_on": [
+                  "9",
+                  "11"
+                ],
+                "description": "Calculate directional derivative along first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 12,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1792,
+            "total_tokens": 6303
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 1,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_id": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information including length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Math:bmatrix_create",
+                "parameters": {
+                  "rows": 3,
+                  "columns": 3,
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ]
+                },
+                "depends_on": [],
+                "description": "Create 3x3 covariance matrix from provided values"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix": "{{2.matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to check if matrix is singular"
+              },
+              {
+                "id": "4",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix": "{{2.matrix}}",
+                  "scalar": "{{1.gene_length}}"
+                },
+                "depends_on": [
+                  "1",
+                  "2",
+                  "3"
+                ],
+                "condition": "{{3.determinant}} != 0",
+                "description": "Scale matrix by BRAF gene length since matrix is not singular"
+              },
+              {
+                "id": "5",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute QR decomposition returning Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Math:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute SVD returning U, S (singular values), and V^T matrices"
+              },
+              {
+                "id": "7",
+                "tool": "Math:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Extract orthonormal basis from the matrix using the U matrix from SVD"
+              },
+              {
+                "id": "8",
+                "tool": "Math:change_of_basis",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}",
+                  "basis": "{{6.U}}"
+                },
+                "depends_on": [
+                  "4",
+                  "6"
+                ],
+                "description": "Express the scaled matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "9",
+                "tool": "Math:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "10",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1.5,
+                    1.2,
+                    0.8
+                  ],
+                  "direction": "{{7.basis_vectors[0]}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+y*z+z\u00b2 along first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1637,
+            "total_tokens": 6148
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 2,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF",
+                  "species": "human"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information including length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Linear Algebra:check_singularity",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "tolerance": 1e-10
+                },
+                "depends_on": [],
+                "description": "Check if the BRAF covariance matrix is singular"
+              },
+              {
+                "id": "3a",
+                "tool": "Linear Algebra:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": "{1.gene_length}"
+                },
+                "depends_on": [
+                  "1",
+                  "2"
+                ],
+                "condition": "{2.is_singular} == false",
+                "description": "Scale covariance matrix by BRAF gene length if matrix is non-singular"
+              },
+              {
+                "id": "3b",
+                "tool": "Linear Algebra:identity",
+                "parameters": {
+                  "size": 3
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "condition": "{2.is_singular} == true",
+                "description": "Return identity matrix if the covariance matrix is singular (no scaling)"
+              },
+              {
+                "id": "4",
+                "tool": "Linear Algebra:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{3a.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "3a"
+                ],
+                "description": "Compute QR decomposition yielding Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "5",
+                "tool": "Linear Algebra:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{3a.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "3a"
+                ],
+                "description": "Compute SVD yielding U, S (singular values), and V^T matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Linear Algebra:extract_orthonormal_basis",
+                "parameters": {
+                  "qr_result": "{4}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Extract orthonormal basis vectors from Q matrix of QR decomposition"
+              },
+              {
+                "id": "7",
+                "tool": "Linear Algebra:coordinate_transform",
+                "parameters": {
+                  "matrix": "{{3a.scaled_matrix}}",
+                  "basis": "{6.basis_vectors}"
+                },
+                "depends_on": [
+                  "3a",
+                  "6"
+                ],
+                "description": "Compute matrix representation in the new orthonormal basis"
+              },
+              {
+                "id": "8",
+                "tool": "Linear Algebra:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{3a.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "3a"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "9",
+                "tool": "Linear Algebra:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": "{6.basis_vectors[:, 0]}",
+                  "direction": "{6.basis_vectors[:, 0]}"
+                },
+                "depends_on": [
+                  "6",
+                  "8"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 along first basis vector using gradient \u2207f=(2x, z, y+2z)"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 3013,
+            "total_tokens": 7524
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 3,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information including length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Math:create_matrix",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3
+                },
+                "depends_on": [],
+                "description": "Construct 3x3 covariance matrix from provided values"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix": "{{2.matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to check if matrix is singular"
+              },
+              {
+                "id": "4",
+                "tool": "Math:check_nonsingular",
+                "parameters": {
+                  "determinant": "{{3.determinant}}",
+                  "threshold": 1e-10
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Verify matrix is non-singular (determinant not near zero)"
+              },
+              {
+                "id": "5",
+                "tool": "Math:scale_matrix",
+                "parameters": {
+                  "matrix": "{{2.matrix}}",
+                  "scalar": "{{1.length}}"
+                },
+                "depends_on": [
+                  "1",
+                  "2",
+                  "4"
+                ],
+                "description": "Scale matrix by BRAF gene length in base pairs"
+              },
+              {
+                "id": "6",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute QR decomposition yielding Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "7",
+                "tool": "Math:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute Singular Value Decomposition yielding U, S, and V^T matrices"
+              },
+              {
+                "id": "8",
+                "tool": "Math:gram_schmidt",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute orthonormal basis for the scaled matrix using Gram-Schmidt process"
+              },
+              {
+                "id": "9",
+                "tool": "Math:change_of_basis",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}",
+                  "basis": "{{8.orthonormal_basis}}"
+                },
+                "depends_on": [
+                  "5",
+                  "8"
+                ],
+                "description": "Express the scaled matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "10",
+                "tool": "Math:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{5.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "11",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction_vector": "{{8.basis_vector_1}}"
+                },
+                "depends_on": [
+                  "8"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z) along first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 11,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1557,
+            "total_tokens": 6068
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 4,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "NCBI:search_gene",
+                "parameters": {
+                  "query": "BRAF gene",
+                  "max_results": 5
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene in NCBI database"
+              },
+              {
+                "id": "2",
+                "tool": "NCBI:fetch_gene",
+                "parameters": {
+                  "gene_id": "{{1.gene_ids[0]}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Fetch detailed BRAF gene information including gene length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "Python:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant to check if covariance matrix is singular"
+              },
+              {
+                "id": "4",
+                "tool": "Python:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": "{{2.gene_length}}"
+                },
+                "depends_on": [
+                  "2",
+                  "3"
+                ],
+                "condition": "{{3.determinant}} != 0",
+                "description": "Scale matrix by BRAF gene length since matrix is not singular"
+              },
+              {
+                "id": "5",
+                "tool": "Python:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute QR decomposition yielding Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Python:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute SVD yielding U (left singular), S (singular values), and V^T (right singular transpose)"
+              },
+              {
+                "id": "7",
+                "tool": "Python:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute orthonormal basis for the scaled matrix using QR decomposition"
+              },
+              {
+                "id": "8",
+                "tool": "Python:matrix_representation",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}",
+                  "basis": "{{7.orthonormal_basis}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Express the scaled matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "9",
+                "tool": "Python:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "10",
+                "tool": "Python:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "vector": "{{7.orthonormal_basis[0]}}",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ]
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+y*z+z\u00b2 along the first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1391,
+            "total_tokens": 5902
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 5,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:search_genes",
+                "parameters": {
+                  "query": "BRAF",
+                  "species": "human",
+                  "limit": 5
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene to identify correct gene ID for length lookup"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_id": "BRCA1"
+                },
+                "depends_on": [],
+                "description": "Get BRAF gene details including gene length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "BioMCP:gene_info",
+                "parameters": {
+                  "gene_id": "673"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information by Ensembl gene ID to get length in base pairs"
+              },
+              {
+                "id": "4",
+                "tool": "Literature:search_pubmed",
+                "parameters": {
+                  "query": "BRAF gene length base pairs",
+                  "max_results": 5
+                },
+                "depends_on": [],
+                "description": "Search literature for verified BRAF gene length data"
+              },
+              {
+                "id": "5",
+                "tool": "Math:compute_determinant",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ]
+                },
+                "depends_on": [],
+                "description": "Calculate determinant to check if 3x3 covariance matrix is singular"
+              },
+              {
+                "id": "6",
+                "tool": "Math:scale_matrix",
+                "parameters": {
+                  "matrix": [
+                    [
+                      1.5,
+                      1.2,
+                      0.8
+                    ],
+                    [
+                      1.2,
+                      1.8,
+                      0.9
+                    ],
+                    [
+                      0.8,
+                      0.9,
+                      1.1
+                    ]
+                  ],
+                  "scalar": 729
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "condition": "{5.determinant} != 0",
+                "description": "Scale matrix by BRAF gene length if matrix is not singular"
+              },
+              {
+                "id": "7",
+                "tool": "Math:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Compute QR decomposition to obtain Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "8",
+                "tool": "Math:svd",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Compute Singular Value Decomposition returning U, S (singular values), and V^T"
+              },
+              {
+                "id": "9",
+                "tool": "Math:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Generate orthonormal basis vectors for the scaled matrix using SVD"
+              },
+              {
+                "id": "10",
+                "tool": "Math:change_of_basis",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}",
+                  "basis": "{{9.basis_vectors}}"
+                },
+                "depends_on": [
+                  "9"
+                ],
+                "description": "Express the matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "11",
+                "tool": "Math:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{6.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Calculate eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "12",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction": "{{9.basis_vectors[0]}}"
+                },
+                "depends_on": [
+                  "9"
+                ],
+                "description": "Calculate directional derivative of x\u00b2 + y*z + z\u00b2 along first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 12,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1543,
+            "total_tokens": 6054
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 6,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_id": "BRAF"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information including gene length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Math:matrix_create",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "columns": 3
+                },
+                "depends_on": [],
+                "description": "Create the 3x3 covariance matrix from provided values"
+              },
+              {
+                "id": "3",
+                "tool": "Math:matrix_determinant",
+                "parameters": {
+                  "matrix_id": "{2.matrix_id}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to check if matrix is singular"
+              },
+              {
+                "id": "4",
+                "tool": "Math:matrix_scale",
+                "parameters": {
+                  "matrix_id": "{2.matrix_id}",
+                  "scalar": "{1.length}"
+                },
+                "depends_on": [
+                  "1",
+                  "2"
+                ],
+                "condition": "{3.determinant} != 0",
+                "description": "Scale matrix by BRAF gene length if matrix is not singular"
+              },
+              {
+                "id": "5",
+                "tool": "Math:matrix_qr",
+                "parameters": {
+                  "matrix_id": "{4.scaled_matrix_id}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute QR decomposition to get Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Math:matrix_svd",
+                "parameters": {
+                  "matrix_id": "{4.scaled_matrix_id}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute Singular Value Decomposition to get U, S (singular values), and V^T"
+              },
+              {
+                "id": "7",
+                "tool": "Math:matrix_eigen",
+                "parameters": {
+                  "matrix_id": "{4.scaled_matrix_id}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Calculate eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "8",
+                "tool": "Math:normalize_vectors",
+                "parameters": {
+                  "vectors": "{7.eigenvectors}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Convert eigenvectors to orthonormal basis for the matrix"
+              },
+              {
+                "id": "9",
+                "tool": "Math:matrix_transform_basis",
+                "parameters": {
+                  "matrix_id": "{4.scaled_matrix_id}",
+                  "basis_vectors": "{8.normalized_vectors}"
+                },
+                "depends_on": [
+                  "4",
+                  "8"
+                ],
+                "description": "Express the matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "10",
+                "tool": "Math:calculate_directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "point": [
+                    1,
+                    1,
+                    1
+                  ],
+                  "direction_vector": "{8.normalized_vectors[0]}"
+                },
+                "depends_on": [
+                  "8"
+                ],
+                "description": "Compute directional derivative of x^2 + y*z + z^2 along first basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1509,
+            "total_tokens": 6020
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 7,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "NCBI:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF",
+                  "organism": "human"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene information including gene length in base pairs"
+              },
+              {
+                "id": "2",
+                "tool": "Mathematics:define_matrix",
+                "parameters": {
+                  "name": "covariance_matrix",
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "dimensions": [
+                    3,
+                    3
+                  ]
+                },
+                "depends_on": [],
+                "description": "Define the 3x3 covariance matrix from tissue expression data"
+              },
+              {
+                "id": "3",
+                "tool": "Mathematics:check_singular",
+                "parameters": {
+                  "matrix": "{{2.covariance_matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Check if the covariance matrix is singular (determinant = 0)"
+              },
+              {
+                "id": "4",
+                "tool": "Mathematics:scale_matrix",
+                "parameters": {
+                  "matrix": "{{2.covariance_matrix}}",
+                  "scalar": "{{1.gene_length}}"
+                },
+                "depends_on": [
+                  "1",
+                  "2",
+                  "3"
+                ],
+                "condition": "{{3.is_singular}} == false",
+                "description": "Scale the covariance matrix by BRAF gene length if matrix is not singular"
+              },
+              {
+                "id": "5",
+                "tool": "Mathematics:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute QR decomposition to obtain Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Mathematics:svd_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute SVD to obtain U (left singular), S (singular values), and V^T (right singular transpose) matrices"
+              },
+              {
+                "id": "7",
+                "tool": "Mathematics:orthonormal_basis",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute orthonormal basis for the scaled matrix using Gram-Schmidt process"
+              },
+              {
+                "id": "8",
+                "tool": "Mathematics:change_of_basis",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}",
+                  "basis": "{{7.orthonormal_basis}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Express the matrix in the new orthonormal basis coordinates"
+              },
+              {
+                "id": "9",
+                "tool": "Mathematics:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled covariance matrix"
+              },
+              {
+                "id": "10",
+                "tool": "Mathematics:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    1,
+                    0,
+                    0
+                  ],
+                  "direction_vector": "{{7.orthonormal_basis[0]}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 along first orthonormal basis vector at point (1,0,0)"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1332,
+            "total_tokens": 5843
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 8,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:biomcp_gene_searcher",
+                "parameters": {
+                  "query": "BRAF human gene"
+                },
+                "depends_on": [],
+                "description": "Search for BRAF gene in human genome database"
+              },
+              {
+                "id": "2",
+                "tool": "BioMCP:biomcp_gene_getter",
+                "parameters": {
+                  "gene_id": "673"
+                },
+                "depends_on": [],
+                "description": "Get BRAF gene details including gene length in base pairs"
+              },
+              {
+                "id": "3",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "det({{1}})",
+                  "params": {
+                    "matrix": [
+                      [
+                        1.5,
+                        1.2,
+                        0.8
+                      ],
+                      [
+                        1.2,
+                        1.8,
+                        0.9
+                      ],
+                      [
+                        0.8,
+                        0.9,
+                        1.1
+                      ]
+                    ]
+                  }
+                },
+                "depends_on": [],
+                "description": "Calculate determinant to check if 3x3 covariance matrix is singular"
+              },
+              {
+                "id": "4",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "QRDecomposition({{matrix}})",
+                  "params": {
+                    "matrix": [
+                      [
+                        1.5,
+                        1.2,
+                        0.8
+                      ],
+                      [
+                        1.2,
+                        1.8,
+                        0.9
+                      ],
+                      [
+                        0.8,
+                        0.9,
+                        1.1
+                      ]
+                    ]
+                  }
+                },
+                "depends_on": [],
+                "description": "QR decomposition to obtain Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "5",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "SingularValueDecomposition({{matrix}})",
+                  "params": {
+                    "matrix": [
+                      [
+                        1.5,
+                        1.2,
+                        0.8
+                      ],
+                      [
+                        1.2,
+                        1.8,
+                        0.9
+                      ],
+                      [
+                        0.8,
+                        0.9,
+                        1.1
+                      ]
+                    ]
+                  }
+                },
+                "depends_on": [],
+                "description": "SVD decomposition to obtain U, S (singular values), and V^T matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "Orthogonalize({{matrix}})",
+                  "params": {
+                    "matrix": [
+                      [
+                        1.5,
+                        1.2,
+                        0.8
+                      ],
+                      [
+                        1.2,
+                        1.8,
+                        0.9
+                      ],
+                      [
+                        0.8,
+                        0.9,
+                        1.1
+                      ]
+                    ]
+                  }
+                },
+                "depends_on": [],
+                "description": "Generate orthonormal basis vectors for the matrix using Gram-Schmidt"
+              },
+              {
+                "id": "7",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "Transpose({{6}}).{{matrix}}.{{6}}",
+                  "params": {
+                    "matrix": [
+                      [
+                        1.5,
+                        1.2,
+                        0.8
+                      ],
+                      [
+                        1.2,
+                        1.8,
+                        0.9
+                      ],
+                      [
+                        0.8,
+                        0.9,
+                        1.1
+                      ]
+                    ],
+                    "basis": "{{6}}"
+                  }
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Compute matrix representation in the new orthonormal basis"
+              },
+              {
+                "id": "8",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "Eigensystem({{matrix}})",
+                  "params": {
+                    "matrix": [
+                      [
+                        1.5,
+                        1.2,
+                        0.8
+                      ],
+                      [
+                        1.2,
+                        1.8,
+                        0.9
+                      ],
+                      [
+                        0.8,
+                        0.9,
+                        1.1
+                      ]
+                    ]
+                  }
+                },
+                "depends_on": [],
+                "description": "Calculate eigenvalues and eigenvectors of the covariance matrix"
+              },
+              {
+                "id": "9",
+                "tool": "Wolfram:compute",
+                "parameters": {
+                  "expression": "Grad(x^2 + y*z + z^2, {x, y, z}).{{6}}[[1]]",
+                  "params": {
+                    "basis_vector": "{{6}}[[1]]"
+                  }
+                },
+                "depends_on": [
+                  "6"
+                ],
+                "description": "Calculate directional derivative of x\u00b2 + y*z + z\u00b2 along first basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 9,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 1990,
+            "total_tokens": 6501
+          }
+        },
+        {
+          "temperature": 0.3,
+          "repetition": 9,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "BioMCP:gene_getter",
+                "parameters": {
+                  "gene_name": "BRAF",
+                  "property": "length"
+                },
+                "depends_on": [],
+                "description": "Fetch BRAF gene length in base pairs from NCBI database"
+              },
+              {
+                "id": "2",
+                "tool": "Matrix:construct",
+                "parameters": {
+                  "values": [
+                    1.5,
+                    1.2,
+                    0.8,
+                    1.2,
+                    1.8,
+                    0.9,
+                    0.8,
+                    0.9,
+                    1.1
+                  ],
+                  "rows": 3,
+                  "cols": 3,
+                  "type": "covariance"
+                },
+                "depends_on": [],
+                "description": "Construct 3x3 covariance matrix from tissue expression data values"
+              },
+              {
+                "id": "3",
+                "tool": "Matrix:determinant",
+                "parameters": {
+                  "matrix": "{{2.matrix}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Calculate determinant to check if matrix is singular"
+              },
+              {
+                "id": "4",
+                "tool": "Matrix:scale",
+                "parameters": {
+                  "matrix": "{{2.matrix}}",
+                  "scalar": "{{1.gene_length}}"
+                },
+                "depends_on": [
+                  "1",
+                  "2",
+                  "3"
+                ],
+                "condition": "{{3.determinant}} != 0",
+                "description": "Scale matrix by BRAF gene length (only if non-singular)"
+              },
+              {
+                "id": "5",
+                "tool": "Matrix:qr_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute QR decomposition yielding Q (orthogonal) and R (upper triangular) matrices"
+              },
+              {
+                "id": "6",
+                "tool": "Matrix:svd",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute Singular Value Decomposition yielding U, S, and V transpose matrices"
+              },
+              {
+                "id": "7",
+                "tool": "Matrix:orthonormalize",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute orthonormal basis using Gram-Schmidt process"
+              },
+              {
+                "id": "8",
+                "tool": "Matrix:change_of_basis",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}",
+                  "basis": "{{7.orthonormal_basis}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Express the scaled matrix in the orthonormal basis coordinates"
+              },
+              {
+                "id": "9",
+                "tool": "Matrix:eigen_decomposition",
+                "parameters": {
+                  "matrix": "{{4.scaled_matrix}}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Compute eigenvalues and eigenvectors of the scaled matrix"
+              },
+              {
+                "id": "10",
+                "tool": "Math:directional_derivative",
+                "parameters": {
+                  "function": "x^2 + y*z + z^2",
+                  "variables": [
+                    "x",
+                    "y",
+                    "z"
+                  ],
+                  "point": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "direction_vector": "{{7.basis_vectors[0]}}"
+                },
+                "depends_on": [
+                  "7"
+                ],
+                "description": "Calculate directional derivative of f(x,y,z)=x\u00b2+yz+z\u00b2 along first orthonormal basis vector"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 4511,
+            "completion_tokens": 2789,
+            "total_tokens": 7300
+          }
+        }
+      ],
+      "ground_truth": {
+        "task_description": "You are to perform a multi-step analysis combining biomedical data retrieval and advanced linear algebra on a covariance matrix of BRAF gene expression across three tissues (skin, lung, colon).\n\nSteps to execute in order:\n1. Use BioMCP:think (thoughtNumber=1, totalThoughts=3) to structure your approach.\n2. Use BioMCP:fetch to retrieve full gene information for 'BRAF' (domain='gene'). Extract the gene length (in base pairs) from the returned metadata; call this value gene_length.\n3. Use Scientific Computing:create_tensor to create a 3\u00d73 covariance matrix named 'cov_matrix' with values [1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1] corresponding to variances and covariances among skin, lung, and colon.\n4. Use Scientific Computing:determinant on 'cov_matrix'. If the determinant is zero, report that the matrix is singular and abort further steps. Otherwise proceed.\n5. Use Scientific Computing:scale_matrix on 'cov_matrix' with scale_factor set to the fetched gene_length and in_place=true to update 'cov_matrix' in memory.\n6. In parallel:\n   a) Use Scientific Computing:qr_decompose on 'cov_matrix' to get Q and R matrices.\n   b) Use Scientific Computing:svd_decompose on 'cov_matrix' to get U, S (singular values), and V^T.\n7. Use Scientific Computing:find_orthonormal_basis on 'cov_matrix' to obtain a list of three orthonormal basis vectors.\n8. Use Scientific Computing:change_basis on 'cov_matrix' with new_basis set to the vectors from step 7, yielding the representation of the scaled covariance matrix in its orthonormal basis.\n9. Use Scientific Computing:compute_eigen on 'cov_matrix' to compute its eigenvalues and right eigenvectors.\n10. Use Scientific Computing:directional_deriv on the scalar field f(x,y,z) = \"x**2 + y*z + z**2\" along the first orthonormal basis vector returned in step 7 (pass unit=true).\n\nCompile and return a structured report including:\n- The fetched gene_length\n- Original determinant and singularity check\n- QR decomposition matrices Q and R\n- Singular values from SVD\n- Orthonormal basis vectors\n- Matrix representation in the new basis\n- Eigenvalues and eigenvectors of the scaled matrix\n- Symbolic expression of the directional derivative along the first basis vector",
+        "dependency_analysis": {
+          "tool_chains": [
+            "BioMCP:think \u2192 BioMCP:fetch \u2192 Scientific Computing:scale_matrix",
+            "Scientific Computing:create_tensor \u2192 Scientific Computing:determinant \u2192 Scientific Computing:scale_matrix",
+            "Scientific Computing:scale_matrix \u2192 Scientific Computing:qr_decompose & Scientific Computing:svd_decompose",
+            "Scientific Computing:scale_matrix \u2192 Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:change_basis",
+            "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:compute_eigen",
+            "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:directional_deriv"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "generation_info": {
+    "status": "completed"
+  },
+  "server_tasks": [
+    {
+      "server_name": "Scientific Computing+BioMCP+Math MCP",
+      "tasks": [
+        {
+          "task_id": "scientific_computing_biomcp_math_mcp_001",
+          "task_description": "You are to perform a multi-step analysis combining biomedical data retrieval and advanced linear algebra on a covariance matrix of BRAF gene expression across three tissues (skin, lung, colon).\n\nSteps to execute in order:\n1. Use BioMCP:think (thoughtNumber=1, totalThoughts=3) to structure your approach.\n2. Use BioMCP:fetch to retrieve full gene information for 'BRAF' (domain='gene'). Extract the gene length (in base pairs) from the returned metadata; call this value gene_length.\n3. Use Scientific Computing:create_tensor to create a 3\u00d73 covariance matrix named 'cov_matrix' with values [1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1] corresponding to variances and covariances among skin, lung, and colon.\n4. Use Scientific Computing:determinant on 'cov_matrix'. If the determinant is zero, report that the matrix is singular and abort further steps. Otherwise proceed.\n5. Use Scientific Computing:scale_matrix on 'cov_matrix' with scale_factor set to the fetched gene_length and in_place=true to update 'cov_matrix' in memory.\n6. In parallel:\n   a) Use Scientific Computing:qr_decompose on 'cov_matrix' to get Q and R matrices.\n   b) Use Scientific Computing:svd_decompose on 'cov_matrix' to get U, S (singular values), and V^T.\n7. Use Scientific Computing:find_orthonormal_basis on 'cov_matrix' to obtain a list of three orthonormal basis vectors.\n8. Use Scientific Computing:change_basis on 'cov_matrix' with new_basis set to the vectors from step 7, yielding the representation of the scaled covariance matrix in its orthonormal basis.\n9. Use Scientific Computing:compute_eigen on 'cov_matrix' to compute its eigenvalues and right eigenvectors.\n10. Use Scientific Computing:directional_deriv on the scalar field f(x,y,z) = \"x**2 + y*z + z**2\" along the first orthonormal basis vector returned in step 7 (pass unit=true).\n\nCompile and return a structured report including:\n- The fetched gene_length\n- Original determinant and singularity check\n- QR decomposition matrices Q and R\n- Singular values from SVD\n- Orthonormal basis vectors\n- Matrix representation in the new basis\n- Eigenvalues and eigenvectors of the scaled matrix\n- Symbolic expression of the directional derivative along the first basis vector",
+          "fuzzy_description": "I\u2019ve been banging my head trying to pull together some solid figures for my boss\u2019s presentation next week on BRAF expression in skin, lung and colon tissue. I grabbed the covariance numbers and stuck them into a 3\u00d73 matrix\u20141.5, 1.2, 0.8 in the first row; 1.2, 1.8, 0.9 in the second; and 0.8, 0.9, 1.1 in the third\u2014and then fetched the gene\u2019s length, which turned out to be exactly 190,489 base pairs. \n\nNow I\u2019m stuck figuring out whether that matrix is singular (so I need its determinant), and if it\u2019s safe to scale every entry by 190,489 right in place. After that, I\u2019d really like to see the Q and R pieces from a QR decomposition, the singular values from an SVD, and an orthonormal basis so I can rewrite the scaled matrix in that new basis. I also need its eigenvalues and eigenvectors, and\u2014just to round it all off\u2014the directional derivative of f(x,y,z) = x**2 + y*z + z**2 along the first orthonormal vector. \n\nCould you walk me through all of those numbers? I need every result spelled out clearly\u2014no hand-wavy summaries\u2014so I\u2019ve got the hard data to show.\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
+          "dependency_analysis": {
+            "tool_chains": [
+              "BioMCP:think \u2192 BioMCP:fetch \u2192 Scientific Computing:scale_matrix",
+              "Scientific Computing:create_tensor \u2192 Scientific Computing:determinant \u2192 Scientific Computing:scale_matrix",
+              "Scientific Computing:scale_matrix \u2192 Scientific Computing:qr_decompose & Scientific Computing:svd_decompose",
+              "Scientific Computing:scale_matrix \u2192 Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:change_basis",
+              "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:compute_eigen",
+              "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:directional_deriv"
+            ]
+          },
+          "distraction_servers": [
+            "Bibliomantic",
+            "Car Price Evaluator",
+            "DEX Paprika",
+            "Google Maps",
+            "Huge Icons",
+            "Hugging Face",
+            "Metropolitan Museum",
+            "National Parks",
+            "Reddit",
+            "Unit Converter"
+          ]
+        }
+      ],
+      "servers": [
+        "Scientific Computing",
+        "BioMCP",
+        "Math MCP"
+      ],
+      "combination_name": "Research Computing",
+      "combination_type": "three_server_combinations"
+    }
+  ],
+  "total_tasks": 1
+}
