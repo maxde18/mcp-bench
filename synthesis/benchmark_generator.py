@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from synthesis.task_synthesis import TaskSynthesizer
 from utils.collect_mcp_info import MCPServerInfoCollector
 from utils.local_server_config import LocalServerConfigLoader
-from mcp_modules.server_manager import MultiServerManager
+from mcp_infra.server_manager import MultiServerManager
 
 # Setup logging
 logging.basicConfig(
@@ -57,16 +57,16 @@ class BenchmarkTaskGenerator:
         self.info_collector = MCPServerInfoCollector()
         
         # Initialize LLM provider for TaskSynthesizer
-        from openai import AsyncAzureOpenAI
+        from openai import AsyncOpenAI
         from llm.provider import LLMProvider
+        from llm.factory import OPENROUTER_BASE_URL
         import os
-        
-        azure_client = AsyncAzureOpenAI(
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version="2024-12-01-preview"
+
+        client = AsyncOpenAI(
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+            base_url=OPENROUTER_BASE_URL,
         )
-        llm_provider = LLMProvider(azure_client, "o4-mini", "azure")
+        llm_provider = LLMProvider(client, "qwen/qwen3-235b-a22b-2507")
         
         # TaskSynthesizer only takes llm_provider
         self.synthesizer = TaskSynthesizer(llm_provider)
@@ -390,7 +390,7 @@ class BenchmarkTaskGenerator:
                         "processed_servers": idx,
                         "successful_servers": len(successful_servers),
                         "failed_servers": len(failed_servers),
-                        "generation_model": "o4-mini",
+                        "generation_model": "qwen/qwen3-235b-a22b-2507",
                         "tasks_per_server": self.tasks_per_server,
                         "duration": str(datetime.now() - start_time),
                         "status": "in_progress" if idx < len(configs_to_process) else "completed"
@@ -412,7 +412,7 @@ class BenchmarkTaskGenerator:
                 "processed_servers": len(configs_to_process),
                 "successful_servers": len(successful_servers),
                 "failed_servers": len(failed_servers),
-                "generation_model": "o4-mini",
+                "generation_model": "qwen/qwen3-235b-a22b-2507",
                 "tasks_per_server": self.tasks_per_server,
                 "duration": str(datetime.now() - start_time),
                 "status": "completed"

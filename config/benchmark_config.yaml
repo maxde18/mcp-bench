@@ -199,7 +199,3 @@ server_selection:
   # Tool sample count (for display)
   tool_sample_count: 3
 
-# Azure OpenAI configuration
-azure:
-  # API version for Azure OpenAI
-  api_version: "2024-12-01-preview"

@@ -1,0 +1,23 @@
+{
+  "task_completion_score": 5.15,
+  "tool_selection_score": 8.3,
+  "planning_effectiveness_and_efficiency_score": 6.4,
+  "task_fulfillment": 0.9,
+  "grounding": 9.4,
+  "tool_appropriateness": 8.6,
+  "parameter_accuracy": 8.0,
+  "dependency_awareness": 6.6,
+  "parallelism_and_efficiency": 6.2,
+  "input_schema_compliance": 0.0,
+  "valid_tool_name_rate": 0.0,
+  "tool_call_success_rate": 0.0,
+  "avg_execution_time": 55.277099609375,
+  "avg_agent_execution_time": 44.66152834892273,
+  "avg_evaluation_time": 285.4420897960663,
+  "task_success_rate": 1.0,
+  "avg_total_rounds": 4.0,
+  "avg_tool_calls_per_task": 8.0,
+  "avg_output_tokens": 2025.0,
+  "avg_prompt_tokens": 13299.0,
+  "avg_total_tokens": 15324.0
+}

@@ -17,7 +17,7 @@ if __name__ == "__main__":
     
     # Import and run the main function from benchmark runner
     try:
-        from benchmark.runner import main
+        from runtime.benchmark.runner import main
         asyncio.run(main())
     except ImportError as e:
         print(f"Import error: {e}")
