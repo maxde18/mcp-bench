@@ -599,6 +599,12 @@ python run_planning_benchmark.py \
 python run_planning_benchmark.py \
     --fuzzy-tasks my_prompts.json \
     --output results/my_plans.json
+
+# Exclude distraction servers (only task-relevant tools shown to the agent)
+python run_planning.py \
+    --tasks tasks/mcpbench_tasks_multi_2server_runner_format.json \
+    --model claude-sonnet-4 \
+    --no-distraction-servers
 ```
 
 **Requires `OPENROUTER_API_KEY` in environment** (or `AZURE_OPENAI_API_KEY` + `AZURE_OPENAI_ENDPOINT` if using an Azure model name).

@@ -1,0 +1,1025 @@
+{
+  "run_timestamp": "2026-04-07T19:25:38.413940",
+  "model": "minimax-m2.7",
+  "source": "tasks/single_task_3server_runner_format.json",
+  "experiment_config": {
+    "variations": 1,
+    "repetitions": 8,
+    "temperatures": [
+      null
+    ],
+    "total_tasks": 1,
+    "total_runs": 8,
+    "native_tools": true,
+    "structured_output": false,
+    "distraction_servers": false
+  },
+  "summary": {
+    "successful_runs": 8,
+    "failed_runs": 0
+  },
+  "runs": [
+    {
+      "task_id": "metropolitan_museum_huge_icons_wikipedia_000",
+      "variation_id": 0,
+      "server_name": "Metropolitan Museum+Huge Icons+Wikipedia",
+      "fuzzy_description": "I’m working on a little side project at my company where I’m using React to build a digital showcase for the Met’s Egyptian Art collection. I need to feature three objects that have good images—if you can’t find enough under the broad “Egyptian Art” label, feel free to focus on some famous sarcophagi instead. For each piece, I’d love the official title and classification, a crisp intro (around 150–200 words max), plus about five key tidbits or facts. It’d also be great to pair each artifact with one or two icons that match its classification—if nothing obvious shows up, just grab some generic museum or artifact icons. Finally, could you include a short React code snippet that demonstrates how to feed this data into a component? And please make sure everything is pulled straight from the Met’s own collection metadata or equally solid sources, since I’ll need real records to back up my demo. Thanks!\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
+      "distraction_servers": [
+        "BioMCP",
+        "DEX Paprika",
+        "FruityVice",
+        "Google Maps",
+        "Math MCP",
+        "Medical Calculator",
+        "NixOS",
+        "OSINT Intelligence",
+        "Reddit",
+        "Unit Converter"
+      ],
+      "repetitions": [
+        {
+          "temperature": null,
+          "repetition": 0,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "departmentId": "10",
+                  "hasImages": true,
+                  "limit": 20
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian Art objects in Met collection with images"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{1.objects[0].objectID}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "filter": "primaryImage != '' AND primaryImageSmall != ''",
+                "description": "Get detailed info for first Egyptian artifact with image"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{1.objects[5].objectID}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "filter": "primaryImage != '' AND primaryImageSmall != ''",
+                "description": "Get detailed info for second Egyptian artifact with image"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{1.objects[10].objectID}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "filter": "primaryImage != '' AND primaryImageSmall != ''",
+                "description": "Get detailed info for third Egyptian artifact with image"
+              },
+              {
+                "id": "5",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "{{2.objectName}}, artifact, museum"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Search for icons matching first artifact's classification"
+              },
+              {
+                "id": "6",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "{{3.objectName}}, artifact, museum"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Search for icons matching second artifact's classification"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "{{4.objectName}}, artifact, museum"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Search for icons matching third artifact's classification"
+              },
+              {
+                "id": "8",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "museum, artifact, history"
+                },
+                "depends_on": [],
+                "description": "Search for generic museum/artifact icons as fallback"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 1028,
+            "total_tokens": 3974
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 1,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum:list-departments",
+                "parameters": {},
+                "depends_on": [],
+                "description": "List all Met departments to find Egyptian Art department ID"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum:search-museum-objects",
+                "parameters": {
+                  "departmentId": "{{1.departments[?(@.displayName=='Egyptian Art')].departmentId}}",
+                  "hasImages": true,
+                  "q": "Egyptian Art"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Search for Egyptian Art objects with images in Met collection"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{{2.objectIDs[0]}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Get detailed metadata for first Egyptian Art object"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{{2.objectIDs[1]}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Get detailed metadata for second Egyptian Art object"
+              },
+              {
+                "id": "5",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{{2.objectIDs[2]}}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Get detailed metadata for third Egyptian Art object"
+              },
+              {
+                "id": "6",
+                "tool": "Metropolitan Museum:search-museum-objects",
+                "parameters": {
+                  "departmentId": "{{1.departments[?(@.displayName=='Egyptian Art')].departmentId}}",
+                  "hasImages": true,
+                  "q": "sarcophagus"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Fallback search for sarcophagi if needed"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "{{3.objectName}}, artifact"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Search for icons matching first object's classification"
+              },
+              {
+                "id": "8",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "{{4.objectName}}, artifact"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Search for icons matching second object's classification"
+              },
+              {
+                "id": "9",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "{{5.objectName}}, artifact"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Search for icons matching third object's classification"
+              },
+              {
+                "id": "10",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "museum, artifact"
+                },
+                "depends_on": [],
+                "description": "Fallback search for generic museum/artifact icons"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 10,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 1330,
+            "total_tokens": 4276
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 2,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "query": "Egyptian Art",
+                  "limit": 30
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian Art objects in Met collection to find candidates with images"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "query": "sarcophagus",
+                  "limit": 20
+                },
+                "depends_on": [],
+                "description": "Search for sarcophagi as fallback if Egyptian Art results are insufficient"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 5440
+                },
+                "depends_on": [],
+                "description": "Get specific Egyptian artifact - Mummy of Imsety (famous Met piece)"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 250364
+                },
+                "depends_on": [],
+                "description": "Get Egyptian Coffin with gilded face - popular Met artifact"
+              },
+              {
+                "id": "5",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 15043
+                },
+                "depends_on": [],
+                "description": "Get Egyptian limestone statue - Classic Period piece"
+              },
+              {
+                "id": "6a",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "mummy, sarcophagus, egyptian"
+                },
+                "depends_on": [],
+                "description": "Search for icons matching Egyptian mummy/sarcophagus classification"
+              },
+              {
+                "id": "6b",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "museum, artifact, ancient"
+                },
+                "depends_on": [],
+                "description": "Search for generic museum/artifact icons as fallback"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons__list_icons",
+                "parameters": {},
+                "depends_on": [],
+                "description": "List all available icons to find suitable museum-related icons"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 700,
+            "total_tokens": 3646
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 3,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum__list-departments",
+                "parameters": {},
+                "depends_on": [],
+                "description": "List all Met departments to find Egyptian Art department ID"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "departmentId": "10",
+                  "q": "Egyptian",
+                  "limit": 20
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian Art objects in the Met collection"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{2.objectIDs[0]}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Get details for Egyptian Art object #1"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{2.objectIDs[1]}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Get details for Egyptian Art object #2"
+              },
+              {
+                "id": "5",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{2.objectIDs[2]}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "description": "Get details for Egyptian Art object #3"
+              },
+              {
+                "id": "6",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "sarcophagus, coffin, ancient"
+                },
+                "depends_on": [],
+                "description": "Search for icons matching sarcophagus/coffin classifications"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "museum, artifact, sculpture"
+                },
+                "depends_on": [],
+                "description": "Search for generic museum/artifact icons as fallback"
+              },
+              {
+                "id": "8",
+                "tool": "Huge Icons__get_platform_usage",
+                "parameters": {
+                  "platform": "react"
+                },
+                "depends_on": [],
+                "description": "Get React-specific usage instructions for Huge Icons"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 8,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 903,
+            "total_tokens": 3849
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 4,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "query": "Egyptian Art",
+                  "limit": 20
+                },
+                "depends_on": [],
+                "description": "Search Met collection for Egyptian Art objects"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "query": "sarcophagus",
+                  "limit": 10
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian sarcophagi as fallback"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 5440
+                },
+                "depends_on": [],
+                "description": "Get famous Met sarcophagus (Mummy Case of Pa contract)"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 250127
+                },
+                "depends_on": [],
+                "description": "Get Egyptian mummy case/object details"
+              },
+              {
+                "id": "5",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 5432
+                },
+                "depends_on": [],
+                "description": "Get additional Egyptian artifact details"
+              },
+              {
+                "id": "6",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "museum artifact"
+                },
+                "depends_on": [],
+                "description": "Search for generic museum/artifact icons"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "ancient egypt"
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian-specific icons"
+              },
+              {
+                "id": "8",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "mummy sarcophagus"
+                },
+                "depends_on": [],
+                "description": "Search for mummy/sarcophagus icons"
+              },
+              {
+                "id": "9",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "pyramid temple"
+                },
+                "depends_on": [],
+                "description": "Search for pyramid/temple icons"
+              },
+              {
+                "id": "10",
+                "tool": "Huge Icons__list_icons",
+                "parameters": {},
+                "depends_on": [],
+                "description": "Get all available icons to ensure we have options"
+              },
+              {
+                "id": "11",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 5455
+                },
+                "depends_on": [],
+                "description": "Get second Egyptian artifact (gold uraeus crown)"
+              },
+              {
+                "id": "12",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectID": 5474
+                },
+                "depends_on": [],
+                "description": "Get third Egyptian artifact (Wedjat eye)"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 12,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 1254,
+            "total_tokens": 4200
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 5,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum:search-museum-objects",
+                "parameters": {
+                  "departmentId": "10",
+                  "q": "Egyptian Art",
+                  "limit": 15
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian Art collection objects in Met Museum"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum:search-museum-objects",
+                "parameters": {
+                  "q": "sarcophagus",
+                  "limit": 15
+                },
+                "depends_on": [],
+                "description": "Search for sarcophagi as fallback if Egyptian Art search is insufficient"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{1.objectIDs[0]}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed metadata for first Egyptian Art object"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{1.objectIDs[1]}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed metadata for second Egyptian Art object"
+              },
+              {
+                "id": "5",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{1.objectIDs[2]}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed metadata for third Egyptian Art object"
+              },
+              {
+                "id": "6a",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{2.objectIDs[0]}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "condition": "{1.total} < 3",
+                "description": "Get first sarcophagus if insufficient Egyptian Art objects"
+              },
+              {
+                "id": "6b",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{2.objectIDs[1]}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "condition": "{1.total} < 3",
+                "description": "Get second sarcophagus if insufficient Egyptian Art objects"
+              },
+              {
+                "id": "6c",
+                "tool": "Metropolitan Museum:get-museum-object",
+                "parameters": {
+                  "objectId": "{2.objectIDs[2]}"
+                },
+                "depends_on": [
+                  "2"
+                ],
+                "condition": "{1.total} < 3",
+                "description": "Get third sarcophagus if insufficient Egyptian Art objects"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "{3.objectClassification}"
+                },
+                "depends_on": [
+                  "3"
+                ],
+                "description": "Search for icons matching first object's classification"
+              },
+              {
+                "id": "8",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "{4.objectClassification}"
+                },
+                "depends_on": [
+                  "4"
+                ],
+                "description": "Search for icons matching second object's classification"
+              },
+              {
+                "id": "9",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "{5.objectClassification}"
+                },
+                "depends_on": [
+                  "5"
+                ],
+                "description": "Search for icons matching third object's classification"
+              },
+              {
+                "id": "10",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "museum artifact ancient"
+                },
+                "depends_on": [],
+                "description": "Get fallback generic museum/artifact icons if classification icons unavailable"
+              },
+              {
+                "id": "11",
+                "tool": "Huge Icons:search_icons",
+                "parameters": {
+                  "query": "mummy sarcophagus tomb"
+                },
+                "depends_on": [],
+                "description": "Get fallback icons for sarcophagus/mummy if classification icons unavailable"
+              },
+              {
+                "id": "12",
+                "tool": "Huge Icons:list_icons",
+                "parameters": {},
+                "depends_on": [],
+                "description": "List all available icons for fallback selection"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 14,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 1476,
+            "total_tokens": 4422
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 6,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "q": "Egyptian Art",
+                  "limit": 20
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian Art objects in Met collection"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{1.objects[0].objectID}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "filter": "primaryImageSmall != '' AND primaryImageSmall != null",
+                "description": "Get details for first Egyptian Art object with an image"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{1.objects[1].objectID}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "filter": "primaryImageSmall != '' AND primaryImageSmall != null",
+                "description": "Get details for second Egyptian Art object with an image"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{1.objects[2].objectID}}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "filter": "primaryImageSmall != '' AND primaryImageSmall != null",
+                "description": "Get details for third Egyptian Art object with an image"
+              },
+              {
+                "id": "5a",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "q": "sarcophagus Egyptian",
+                  "limit": 10
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian sarcophagi as fallback"
+              },
+              {
+                "id": "5b",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{5a.objects[0].objectID}}"
+                },
+                "depends_on": [
+                  "5a"
+                ],
+                "filter": "primaryImageSmall != '' AND primaryImageSmall != null",
+                "description": "Get first sarcophagus details with image"
+              },
+              {
+                "id": "5c",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{5a.objects[1].objectID}}"
+                },
+                "depends_on": [
+                  "5a"
+                ],
+                "filter": "primaryImageSmall != '' AND primaryImageSmall != null",
+                "description": "Get second sarcophagus details with image"
+              },
+              {
+                "id": "5d",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{{5a.objects[2].objectID}}"
+                },
+                "depends_on": [
+                  "5a"
+                ],
+                "filter": "primaryImageSmall != '' AND primaryImageSmall != null",
+                "description": "Get third sarcophagus details with image"
+              },
+              {
+                "id": "6",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "museum artifact sarcophagus Egyptian"
+                },
+                "depends_on": [],
+                "description": "Search for Egyptian artifact and museum icons"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "ancient history sculpture"
+                },
+                "depends_on": [],
+                "description": "Search for ancient history and sculpture icons"
+              },
+              {
+                "id": "8",
+                "tool": "Huge Icons__get_platform_usage",
+                "parameters": {},
+                "depends_on": [
+                  "6",
+                  "7"
+                ],
+                "description": "Get platform usage instructions for React integration"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 11,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 1344,
+            "total_tokens": 4290
+          }
+        },
+        {
+          "temperature": null,
+          "repetition": 7,
+          "status": "success",
+          "generated_plan": {
+            "nodes": [
+              {
+                "id": "1",
+                "tool": "Metropolitan Museum__search-museum-objects",
+                "parameters": {
+                  "q": "Egyptian Art",
+                  "medium": "Sarcophagi",
+                  "limit": 15
+                },
+                "depends_on": [],
+                "description": "Search Met collection for Egyptian Art objects, prioritizing sarcophagi"
+              },
+              {
+                "id": "2",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{1.objectIDs[0]}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed metadata for 1st Egyptian artifact"
+              },
+              {
+                "id": "3",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{1.objectIDs[1]}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed metadata for 2nd Egyptian artifact"
+              },
+              {
+                "id": "4",
+                "tool": "Metropolitan Museum__get-museum-object",
+                "parameters": {
+                  "objectId": "{1.objectIDs[2]}"
+                },
+                "depends_on": [
+                  "1"
+                ],
+                "description": "Get detailed metadata for 3rd Egyptian artifact"
+              },
+              {
+                "id": "5",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "sarcophagus, coffin, mummy"
+                },
+                "depends_on": [],
+                "description": "Search for sarcophagus/coffin icons for Egyptian artifacts"
+              },
+              {
+                "id": "6",
+                "tool": "Huge Icons__search_icons",
+                "parameters": {
+                  "query": "museum, artifact, statue, sculpture"
+                },
+                "depends_on": [],
+                "description": "Search for museum and artifact-related icons"
+              },
+              {
+                "id": "7",
+                "tool": "Huge Icons__get_platform_usage",
+                "parameters": {
+                  "platform": "react"
+                },
+                "depends_on": [],
+                "description": "Get React-specific usage instructions for icons"
+              }
+            ]
+          },
+          "validation": {
+            "is_valid": true,
+            "schema_valid": true,
+            "has_cycle": false,
+            "dangling_deps": [],
+            "duplicate_ids": [],
+            "node_count": 7,
+            "errors": []
+          },
+          "token_usage": {
+            "prompt_tokens": 2946,
+            "completion_tokens": 1155,
+            "total_tokens": 4101
+          }
+        }
+      ],
+      "ground_truth": {
+        "task_description": "Create a React-based digital exhibit overview featuring three artifacts from the Met’s Egyptian Art department. 1) Call list-departments to locate the department whose name contains “Egyptian Art.” 2) Use the resulting departmentId to call search-museum-objects with q=\"Egyptian\", hasImages=true, departmentId=<id>. If fewer than three objects are returned, repeat search-museum-objects with title=true, q=\"Sarcophagus\", hasImages=true, departmentId=<id>. 3) For the top three objectIds, call get-museum-object(objectId, returnImage=true) to retrieve title, objectName, classification, and image URL. 4) For each artifact’s title or classification, call search_wikipedia(query=<classification or title>) and take the first match. 5) Call get_summary(title=<article>) and measure its length: if over 200 characters, call summarize_article_section(title=<article>, section_title=\"Overview\", max_length=150); if under 200, call summarize_article_for_query(title=<article>, query=<classification>, max_length=250). 6) Call extract_key_facts(title=<article>, topic_within_article=<classification>, count=5). 7) In parallel, call list_icons to retrieve all available icon names. For each artifact’s classification, call search_icons(query=<classification>) and select up to two icons; if none found, fallback to search_icons(query=\"museum,artifact\"). Validate each found icon against the list_icons result. 8) Finally, call get_platform_usage(platform=\"react\") to obtain React integration code snippets. 9) Produce a combined JSON report listing each artifact’s id, title, image URL, summary, key facts, chosen icons, and React usage sample.",
+        "dependency_analysis": "Step 1→2: list-departments supplies departmentId for search-museum-objects. Decision: if search returns <3, branch to a second search-museum-objects call with title=true. Step 2→3: search-museum-objects yields objectIds consumed by get-museum-object. Step 3→4: each artifact’s title/classification feeds search_wikipedia. Step 4→5: get_summary result length drives conditional calls to summarize_article_section or summarize_article_for_query. Step 5→6: summaries and classification feed extract_key_facts. Parallel chain: list_icons → search_icons for each classification → validation against list_icons, with fallback query if empty. Final consolidation: get_platform_usage(react) combines with artifacts and icons data. Cross-server dependencies: Met data (classification) drives Wikipedia and Huge Icons queries; icon search results are cross-validated against list_icons; React usage ties icon data back into the UI context."
+      }
+    }
+  ]
+}

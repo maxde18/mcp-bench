@@ -161,6 +161,7 @@ async def run(
     variations: int,
     native_tools: bool = False,
     structured_output: bool = False,
+    distraction_servers: bool = True,
 ) -> None:
     # ------------------------------------------------------------------
     # LLM provider
@@ -172,7 +173,11 @@ async def run(
             f"Model '{model_name}' not found. Check your env vars. "
             f"Available: {available}"
         )
-    llm_provider = await LLMFactory.create_llm_provider(model_configs[model_name])
+    model_config = model_configs[model_name]
+    # ChatOpenRouter for PlanOnlyExecutor (LangGraph-native, bind_tools support).
+    chat_model = LLMFactory.create_chat_model(model_config)
+    # LLMProvider kept for TaskSynthesizer (uses raw OpenAI-compatible API).
+    llm_provider = await LLMFactory.create_llm_provider(model_config)
 
     # ------------------------------------------------------------------
     # BenchmarkRunner — used for server config resolution helpers only
@@ -180,7 +185,7 @@ async def run(
     runner = BenchmarkRunner(
         tasks_file=tasks_file or "tasks/mcpbench_tasks_multi_2server_runner_format.json",
         use_fuzzy_descriptions=True,
-        enable_distraction_servers=True,
+        enable_distraction_servers=distraction_servers,
     )
     servers_info = await runner.load_server_configs()
     runner.commands_config = await runner.load_commands_config()
@@ -252,8 +257,9 @@ async def run(
                     "temperatures":  temperatures,
                     "total_tasks":   len(tasks),
                     "total_runs":    total_runs,
-                    "native_tools":       native_tools,
-                    "structured_output":  structured_output,
+                    "native_tools":          native_tools,
+                    "structured_output":     structured_output,
+                    "distraction_servers":   distraction_servers,
                 },
                 "summary": {
                     "successful_runs": successful,
@@ -303,7 +309,7 @@ async def run(
                 if not conn_mgr.all_tools:
                     raise RuntimeError("No tools discovered from any server")
 
-                executor = PlanOnlyExecutor(llm_provider, conn_mgr.all_tools)
+                executor = PlanOnlyExecutor(chat_model, conn_mgr.all_tools)
 
                 # Build list of (variation_id, fuzzy_description) to run.
                 # Variation 0 is always the original fuzzy description.
@@ -499,6 +505,16 @@ def main() -> None:
             "native tool definitions on OpenRouter."
         ),
     )
+    parser.add_argument(
+        "--no-distraction-servers",
+        action="store_true",
+        default=False,
+        help=(
+            "Exclude distraction servers from the prompt. When set, only the "
+            "task-relevant server tools are shown to the agent. Defaults to False "
+            "(distraction servers included)."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -523,6 +539,7 @@ def main() -> None:
             args.variations,
             native_tools=args.native_tools,
             structured_output=args.structured_output,
+            distraction_servers=not args.no_distraction_servers,
         )
     )
 

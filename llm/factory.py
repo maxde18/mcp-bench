@@ -12,6 +12,7 @@ Classes:
 import os
 from typing import Dict
 from openai import AsyncOpenAI
+from langchain_openrouter import ChatOpenRouter
 from .provider import LLMProvider
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
@@ -106,3 +107,26 @@ class LLMFactory:
             base_url=OPENROUTER_BASE_URL,
         )
         return LLMProvider(client=client, deployment_name=model_config.model_name)
+
+    @staticmethod
+    def create_chat_model(model_config: ModelConfig, max_retries: int = 3) -> ChatOpenRouter:
+        """Create a ChatOpenRouter model for the given model configuration.
+
+        Uses the ``langchain-openrouter`` integration, which provides native
+        LangGraph support, tool binding via ``bind_tools()``, and structured
+        output via ``with_structured_output()`` or ``bind(response_format=...)``.
+
+        The ``OPENROUTER_API_KEY`` environment variable is read automatically.
+
+        Args:
+            model_config: Configuration for the model to create.
+            max_retries:  Number of automatic retry attempts on transient API
+                          errors (default: 3).
+
+        Returns:
+            Configured ChatOpenRouter instance.
+        """
+        return ChatOpenRouter(
+            model=model_config.model_name,
+            max_retries=max_retries,
+        )

@@ -174,6 +174,19 @@ Under the hood, `--native-tools` calls `MCPConnector.format_tools_for_api(all_to
 
 The mode used is recorded in each output file under `experiment_config.native_tools` so results are self-documenting.
 
+### Distraction server control
+
+By default each task includes its predefined distraction servers — extra irrelevant MCP servers whose tools appear in the prompt alongside the task-relevant ones, testing the agent's ability to filter noise. Pass `--no-distraction-servers` to suppress them:
+
+```bash
+python run_planning.py \
+    --tasks tasks/mcpbench_tasks_multi_2server_runner_format.json \
+    --model claude-sonnet-4 \
+    --no-distraction-servers
+```
+
+This is useful as a baseline to isolate planning accuracy from noise sensitivity. The setting is recorded in each output file under `experiment_config.distraction_servers`.
+
 ### Structured output (OpenRouter models only)
 
 When running against an OpenRouter model, `PlanOnlyExecutor` automatically passes the dependency graph JSON schema to the API via the `response_format` parameter using OpenRouter's `json_schema` structured output format:

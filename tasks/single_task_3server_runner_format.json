@@ -4,42 +4,33 @@
   },
   "server_tasks": [
     {
-      "server_name": "Scientific Computing+BioMCP+Math MCP",
+      "server_name": "Metropolitan Museum+Huge Icons+Wikipedia",
       "tasks": [
         {
-          "task_id": "scientific_computing_biomcp_math_mcp_001",
-          "task_description": "You are to perform a multi-step analysis combining biomedical data retrieval and advanced linear algebra on a covariance matrix of BRAF gene expression across three tissues (skin, lung, colon).\n\nSteps to execute in order:\n1. Use BioMCP:think (thoughtNumber=1, totalThoughts=3) to structure your approach.\n2. Use BioMCP:fetch to retrieve full gene information for 'BRAF' (domain='gene'). Extract the gene length (in base pairs) from the returned metadata; call this value gene_length.\n3. Use Scientific Computing:create_tensor to create a 3\u00d73 covariance matrix named 'cov_matrix' with values [1.5, 1.2, 0.8, 1.2, 1.8, 0.9, 0.8, 0.9, 1.1] corresponding to variances and covariances among skin, lung, and colon.\n4. Use Scientific Computing:determinant on 'cov_matrix'. If the determinant is zero, report that the matrix is singular and abort further steps. Otherwise proceed.\n5. Use Scientific Computing:scale_matrix on 'cov_matrix' with scale_factor set to the fetched gene_length and in_place=true to update 'cov_matrix' in memory.\n6. In parallel:\n   a) Use Scientific Computing:qr_decompose on 'cov_matrix' to get Q and R matrices.\n   b) Use Scientific Computing:svd_decompose on 'cov_matrix' to get U, S (singular values), and V^T.\n7. Use Scientific Computing:find_orthonormal_basis on 'cov_matrix' to obtain a list of three orthonormal basis vectors.\n8. Use Scientific Computing:change_basis on 'cov_matrix' with new_basis set to the vectors from step 7, yielding the representation of the scaled covariance matrix in its orthonormal basis.\n9. Use Scientific Computing:compute_eigen on 'cov_matrix' to compute its eigenvalues and right eigenvectors.\n10. Use Scientific Computing:directional_deriv on the scalar field f(x,y,z) = \"x**2 + y*z + z**2\" along the first orthonormal basis vector returned in step 7 (pass unit=true).\n\nCompile and return a structured report including:\n- The fetched gene_length\n- Original determinant and singularity check\n- QR decomposition matrices Q and R\n- Singular values from SVD\n- Orthonormal basis vectors\n- Matrix representation in the new basis\n- Eigenvalues and eigenvectors of the scaled matrix\n- Symbolic expression of the directional derivative along the first basis vector",
-          "fuzzy_description": "I\u2019ve been banging my head trying to pull together some solid figures for my boss\u2019s presentation next week on BRAF expression in skin, lung and colon tissue. I grabbed the covariance numbers and stuck them into a 3\u00d73 matrix\u20141.5, 1.2, 0.8 in the first row; 1.2, 1.8, 0.9 in the second; and 0.8, 0.9, 1.1 in the third\u2014and then fetched the gene\u2019s length, which turned out to be exactly 190,489 base pairs. \n\nNow I\u2019m stuck figuring out whether that matrix is singular (so I need its determinant), and if it\u2019s safe to scale every entry by 190,489 right in place. After that, I\u2019d really like to see the Q and R pieces from a QR decomposition, the singular values from an SVD, and an orthonormal basis so I can rewrite the scaled matrix in that new basis. I also need its eigenvalues and eigenvectors, and\u2014just to round it all off\u2014the directional derivative of f(x,y,z) = x**2 + y*z + z**2 along the first orthonormal vector. \n\nCould you walk me through all of those numbers? I need every result spelled out clearly\u2014no hand-wavy summaries\u2014so I\u2019ve got the hard data to show.\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
-          "dependency_analysis": {
-            "tool_chains": [
-              "BioMCP:think \u2192 BioMCP:fetch \u2192 Scientific Computing:scale_matrix",
-              "Scientific Computing:create_tensor \u2192 Scientific Computing:determinant \u2192 Scientific Computing:scale_matrix",
-              "Scientific Computing:scale_matrix \u2192 Scientific Computing:qr_decompose & Scientific Computing:svd_decompose",
-              "Scientific Computing:scale_matrix \u2192 Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:change_basis",
-              "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:compute_eigen",
-              "Scientific Computing:find_orthonormal_basis \u2192 Scientific Computing:directional_deriv"
-            ]
-          },
+          "task_id": "metropolitan_museum_huge_icons_wikipedia_000",
+          "task_description": "Create a React-based digital exhibit overview featuring three artifacts from the Met\u2019s Egyptian Art department. 1) Call list-departments to locate the department whose name contains \u201cEgyptian Art.\u201d 2) Use the resulting departmentId to call search-museum-objects with q=\"Egyptian\", hasImages=true, departmentId=<id>. If fewer than three objects are returned, repeat search-museum-objects with title=true, q=\"Sarcophagus\", hasImages=true, departmentId=<id>. 3) For the top three objectIds, call get-museum-object(objectId, returnImage=true) to retrieve title, objectName, classification, and image URL. 4) For each artifact\u2019s title or classification, call search_wikipedia(query=<classification or title>) and take the first match. 5) Call get_summary(title=<article>) and measure its length: if over 200 characters, call summarize_article_section(title=<article>, section_title=\"Overview\", max_length=150); if under 200, call summarize_article_for_query(title=<article>, query=<classification>, max_length=250). 6) Call extract_key_facts(title=<article>, topic_within_article=<classification>, count=5). 7) In parallel, call list_icons to retrieve all available icon names. For each artifact\u2019s classification, call search_icons(query=<classification>) and select up to two icons; if none found, fallback to search_icons(query=\"museum,artifact\"). Validate each found icon against the list_icons result. 8) Finally, call get_platform_usage(platform=\"react\") to obtain React integration code snippets. 9) Produce a combined JSON report listing each artifact\u2019s id, title, image URL, summary, key facts, chosen icons, and React usage sample.",
+          "fuzzy_description": "I\u2019m working on a little side project at my company where I\u2019m using React to build a digital showcase for the Met\u2019s Egyptian Art collection. I need to feature three objects that have good images\u2014if you can\u2019t find enough under the broad \u201cEgyptian Art\u201d label, feel free to focus on some famous sarcophagi instead. For each piece, I\u2019d love the official title and classification, a crisp intro (around 150\u2013200 words max), plus about five key tidbits or facts. It\u2019d also be great to pair each artifact with one or two icons that match its classification\u2014if nothing obvious shows up, just grab some generic museum or artifact icons. Finally, could you include a short React code snippet that demonstrates how to feed this data into a component? And please make sure everything is pulled straight from the Met\u2019s own collection metadata or equally solid sources, since I\u2019ll need real records to back up my demo. Thanks!\n\nPlease ensure all findings are supported by concrete data and verifiable sources. I need specific numbers and evidence, not generalizations.",
+          "dependency_analysis": "Step 1\u21922: list-departments supplies departmentId for search-museum-objects. Decision: if search returns <3, branch to a second search-museum-objects call with title=true. Step 2\u21923: search-museum-objects yields objectIds consumed by get-museum-object. Step 3\u21924: each artifact\u2019s title/classification feeds search_wikipedia. Step 4\u21925: get_summary result length drives conditional calls to summarize_article_section or summarize_article_for_query. Step 5\u21926: summaries and classification feed extract_key_facts. Parallel chain: list_icons \u2192 search_icons for each classification \u2192 validation against list_icons, with fallback query if empty. Final consolidation: get_platform_usage(react) combines with artifacts and icons data. Cross-server dependencies: Met data (classification) drives Wikipedia and Huge Icons queries; icon search results are cross-validated against list_icons; React usage ties icon data back into the UI context.",
           "distraction_servers": [
-            "Bibliomantic",
-            "Car Price Evaluator",
+            "BioMCP",
             "DEX Paprika",
+            "FruityVice",
             "Google Maps",
-            "Huge Icons",
-            "Hugging Face",
-            "Metropolitan Museum",
-            "National Parks",
+            "Math MCP",
+            "Medical Calculator",
+            "NixOS",
+            "OSINT Intelligence",
             "Reddit",
             "Unit Converter"
           ]
         }
       ],
       "servers": [
-        "Scientific Computing",
-        "BioMCP",
-        "Math MCP"
+        "Metropolitan Museum",
+        "Huge Icons",
+        "Wikipedia"
       ],
-      "combination_name": "Research Computing",
+      "combination_name": "Creative Resources",
       "combination_type": "three_server_combinations"
     }
   ],

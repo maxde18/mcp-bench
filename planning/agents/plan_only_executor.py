@@ -3,32 +3,41 @@
 Generates a tool dependency graph from a fuzzy task description and available
 tool descriptions. No tools are executed.
 
-This is used by run_planning_benchmark.py to isolate and evaluate the planning
-phase independently from execution.
+Uses ``langchain-openrouter``'s ``ChatOpenRouter`` for native LangGraph
+integration. Tools are bound via ``.bind_tools()`` and structured output is
+enforced via ``.bind(response_format=...)``, removing the need for separate
+``get_completion`` / ``get_completion_with_tools`` code paths.
 """
 
+import json
 import logging
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, Dict, Optional, TypedDict
 
+import json_repair
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_openrouter import ChatOpenRouter
 from langgraph.graph import END, StateGraph
 
 import config.config_loader as config_loader
 from mcp_infra.connector import MCPConnector
-from planning.agents.few_shot_examples import EXAMPLES, format_few_shot_block
+from planning.agents.few_shot_examples import EXAMPLES, build_tool_inventory, format_few_shot_block
 from planning.validation import validate_dag
 
 logger = logging.getLogger(__name__)
 
-# Model name substrings that identify MiniMax models on OpenRouter.
-# These models do not expose a native tools field via OpenRouter, so tools
+# MiniMax models on OpenRouter do not expose a native tools API field, so tools
 # must be embedded in the prompt using MiniMax's JSON training format.
 _MINIMAX_MODEL_SUBSTRINGS = ("minimax/",)
 
-# Computed once at import time — static data, no need to rebuild per call.
-_FEW_SHOT_BLOCK = format_few_shot_block(EXAMPLES)
+# Reasoning models that reject a custom temperature parameter.
+_MODELS_WITHOUT_TEMPERATURE = {
+    "openai/o1-preview", "openai/o1-mini", "openai/o4-mini", "openai/o3-mini", "openai/o3",
+}
+
+# Singleton system message shared across all invocations.
+_SYSTEM_MSG = SystemMessage("You are an expert planning agent that produces tool dependency graphs.")
 
 # OpenRouter structured output schema for the dependency graph response.
-# Passed as response_format when the provider is "openrouter".
 _DEPENDENCY_GRAPH_RESPONSE_FORMAT = {
     "type": "json_schema",
     "json_schema": {
@@ -62,20 +71,22 @@ _DEPENDENCY_GRAPH_RESPONSE_FORMAT = {
 }
 
 
-def _build_planner_prompt(task: str, tools_section: str, extra_rules: str = "") -> str:
+def _build_planner_prompt(task: str, tools_section: str, few_shot_block: str, extra_rules: str = "") -> str:
     """Build the planner prompt.
 
     Args:
-        task:          The task description shown to the agent.
-        tools_section: The block describing available tools (differs between
-                       native-tools mode and text-based mode).
-        extra_rules:   Optional additional rule lines prepended to the common
-                       rules block (used for the native-tools name convention).
+        task:           The task description shown to the agent.
+        tools_section:  The block describing available tools (differs between
+                        native-tools mode and text-based mode).
+        few_shot_block: Pre-built few-shot section (includes tool registry +
+                        examples) from format_few_shot_block().
+        extra_rules:    Optional additional rule lines prepended to the common
+                        rules block (used for the native-tools name convention).
     """
     return f"""You are a planning agent. Given a task and a set of available tools,
 produce a complete execution plan as a dependency graph (DAG).
 
-{_FEW_SHOT_BLOCK}
+{few_shot_block}
 
 Now produce the plan for the following task.
 
@@ -116,6 +127,30 @@ Rules:
 """
 
 
+def _clean_and_parse_json(raw: str) -> Any:
+    """Strip markdown fences and parse JSON, falling back to json_repair."""
+    if "```json" in raw:
+        raw = raw.split("```json")[1].split("```")[0].strip()
+    elif "```" in raw:
+        parts = raw.split("```")
+        if len(parts) >= 2:
+            raw = parts[1].strip()
+
+    raw = raw.strip()
+    if not raw.startswith("{") and not raw.startswith("["):
+        first_brace = raw.find("{")
+        first_bracket = raw.find("[")
+        if first_brace == -1 and first_bracket == -1:
+            raise ValueError(f"No JSON object or array found in response: {raw[:200]}")
+        start = min(x for x in (first_brace, first_bracket) if x != -1)
+        raw = raw[start:]
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        return json_repair.loads(raw)
+
+
 # ---------------------------------------------------------------------------
 # LangGraph state
 # ---------------------------------------------------------------------------
@@ -144,26 +179,30 @@ class PlanOnlyExecutor:
     """Generates an execution plan (dependency graph) without running any tools.
 
     Uses a LangGraph StateGraph with two nodes:
-      planner   — calls the LLM and parses the DAG JSON.
+      planner   — calls the LLM via ChatOpenRouter and parses the DAG JSON.
       validator — checks the DAG for schema errors, cycles, and dangling deps.
     A conditional edge retries the planner (with error feedback injected into
     the prompt) when validation fails and retries remain.
 
+    The ChatOpenRouter model is configured per-call using LangChain's ``.bind()``
+    and ``.bind_tools()`` methods, collapsing what was previously three separate
+    code paths (text mode, native-tools mode, MiniMax mode) into a single
+    ``model.ainvoke(messages)`` call.
+
     Args:
-        llm_provider: Existing LLMProvider instance (from llm/provider.py).
-        all_tools:    Dict of tool descriptions from ConnectionManager.all_tools.
-                      No server_manager is needed — tools are never called.
+        model:     ChatOpenRouter instance from LLMFactory.create_chat_model().
+        all_tools: Dict of tool descriptions from ConnectionManager.all_tools.
+                   No server_manager is needed — tools are never called.
     """
 
-    def __init__(self, llm_provider, all_tools: Dict[str, Any]) -> None:
-        self.llm = llm_provider
+    def __init__(self, model: ChatOpenRouter, all_tools: Dict[str, Any]) -> None:
+        self.base_model = model
         self.all_tools = all_tools
         self.graph = self._build_graph()
 
     def _is_minimax_model(self) -> bool:
         """Return True when the LLM is a MiniMax model accessed via OpenRouter."""
-        name = self.llm.deployment_name.lower()
-        return any(sub in name for sub in _MINIMAX_MODEL_SUBSTRINGS)
+        return any(sub in self.base_model.model_name for sub in _MINIMAX_MODEL_SUBSTRINGS)
 
     # ------------------------------------------------------------------
     # Graph construction
@@ -196,36 +235,43 @@ class PlanOnlyExecutor:
     # ------------------------------------------------------------------
 
     async def _planner_node(self, state: PlannerState) -> PlannerState:
+        # Start from the base model and layer configuration for this run.
+        model = self.base_model
+
+        # Apply temperature — skipped for reasoning models that reject it.
+        if (
+            state["temperature"] is not None
+            and model.model_name not in _MODELS_WITHOUT_TEMPERATURE
+        ):
+            model = model.bind(temperature=state["temperature"])
+
+        # Build the tool inventory (used in the few-shot block for all modes).
+        api_tools = MCPConnector.format_tools_for_api(self.all_tools)
+        inventory = build_tool_inventory(api_tools)
+        few_shot_block = format_few_shot_block(EXAMPLES, tool_inventory=inventory)
+
+        # Build the tools section and configure model tool/output binding.
         if state["use_native_tools"]:
-            api_tools = MCPConnector.format_tools_for_api(self.all_tools)
-            tool_descriptions = "native"
-            tools_section = (
-                "The available tools are provided in the 'tools' field of this request.\n"
-                "Each tool name uses '__' as a separator between server name and tool name\n"
-                "(e.g. 'BioMCP__gene_getter' corresponds to the tool 'BioMCP:gene_getter')."
-            )
+            # Pass tools via the OpenRouter `tools` API field so fine-tuned
+            # tool-calling models receive them in their expected format.
+            tools_section = ""
             extra_rules = (
-                '- Use the original colon-separated name (e.g. "BioMCP:gene_getter") in the\n'
-                '  "tool" field of each node — not the double-underscore API name.\n'
+                '- Tool names in the "tool" field must use colon-separated form\n'
+                '  (e.g. "BioMCP:gene_getter"), not the double-underscore form\n'
+                '  (e.g. "BioMCP__gene_getter") used in the function definitions.\n'
             )
-            prompt = _build_planner_prompt(state["task"], tools_section, extra_rules)
-            response_data = await self.llm.get_completion_with_tools(
-                "You are an expert planning agent that produces tool dependency graphs.",
-                prompt,
-                api_tools,
-                config_loader.get_planning_tokens(),
-                tool_choice="none",
-                return_usage=True,
-                temperature=state["temperature"],
-                response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT if state["use_structured_output"] else None,
-            )
+            # bind_tools() sends tools in the structured API field.
+            # tool_choice="none" makes the model text-respond (output the DAG)
+            # rather than actually calling any tool.
+            model = model.bind_tools(api_tools, tool_choice="none")
+            if state["use_structured_output"]:
+                model = model.bind(response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT)
+            tool_descriptions = "native"
+
         elif self._is_minimax_model():
-            # MiniMax models (minimax-m1, minimax-m2.7, …) were trained on a
-            # specific JSON tool format.  OpenRouter does not expose a native
-            # tools field for these models, so we embed the tool list as a JSON
-            # array in the prompt using the MiniMax training format.
+            # MiniMax models were trained on a specific JSON tool format.
+            # OpenRouter does not expose a native tools field for these models.
             minimax_tools_json = MCPConnector.format_tools_for_minimax_prompt(self.all_tools)
-            tool_descriptions = "minimax_json"
             tools_section = (
                 "The available tools are listed below as a JSON array.\n"
                 "Each tool name uses '__' as a separator between server name and tool name\n"
@@ -236,45 +282,42 @@ class PlanOnlyExecutor:
                 '- Use the original colon-separated name (e.g. "BioMCP:gene_getter") in the\n'
                 '  "tool" field of each node — not the double-underscore name.\n'
             )
-            prompt = _build_planner_prompt(state["task"], tools_section, extra_rules)
-            response_data = await self.llm.get_completion(
-                "You are an expert planning agent that produces tool dependency graphs.",
-                prompt,
-                config_loader.get_planning_tokens(),
-                return_usage=True,
-                temperature=state["temperature"],
-                response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT,
-            )
+            model = model.bind(response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT)
+            tool_descriptions = "minimax_json"
+
         else:
+            # Default: embed tool descriptions as text in the prompt.
             tool_descriptions = MCPConnector.format_tools_for_prompt(self.all_tools)
             tools_section = f"AVAILABLE TOOLS:\n{tool_descriptions}"
-            prompt = _build_planner_prompt(state["task"], tools_section)
-            response_data = await self.llm.get_completion(
-                "You are an expert planning agent that produces tool dependency graphs.",
-                prompt,
-                config_loader.get_planning_tokens(),
-                return_usage=True,
-                temperature=state["temperature"],
-                response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT,
-            )
+            extra_rules = ""
+            model = model.bind(response_format=_DEPENDENCY_GRAPH_RESPONSE_FORMAT)
 
-        response_str, usage = (
-            response_data if isinstance(response_data, tuple) else (response_data, None)
+        prompt = _build_planner_prompt(state["task"], tools_section, few_shot_block, extra_rules)
+        messages = [_SYSTEM_MSG, HumanMessage(prompt)]
+
+        logger.info(
+            f"Calling {self.base_model.model_name} "
+            f"(attempt {state['attempt'] + 1}/{state['max_retries']}, "
+            f"native_tools={state['use_native_tools']})"
         )
+        response = await model.ainvoke(messages)
+
+        # Usage metadata uses LangChain's standard keys (input_tokens / output_tokens).
+        usage = response.usage_metadata or {}
 
         try:
-            dependency_graph = self.llm.clean_and_parse_json(response_str)
+            dependency_graph = _clean_and_parse_json(response.content)
         except Exception as e:
             logger.error(f"Failed to parse dependency graph JSON: {e}")
-            dependency_graph = {"nodes": [], "parse_error": str(e), "raw": response_str}
+            dependency_graph = {"nodes": [], "parse_error": str(e), "raw": response.content}
 
         return {
             **state,
             "dependency_graph":  dependency_graph,
             "tool_descriptions": tool_descriptions,
-            "prompt_tokens":     state["prompt_tokens"] + (usage.get("prompt_tokens", 0) if usage else 0),
-            "completion_tokens": state["completion_tokens"] + (usage.get("completion_tokens", 0) if usage else 0),
-            "total_tokens":      state["total_tokens"] + (usage.get("total_tokens", 0) if usage else 0),
+            "prompt_tokens":     state["prompt_tokens"]     + usage.get("input_tokens", 0),
+            "completion_tokens": state["completion_tokens"] + usage.get("output_tokens", 0),
+            "total_tokens":      state["total_tokens"]      + usage.get("total_tokens", 0),
         }
 
     # ------------------------------------------------------------------
@@ -325,15 +368,15 @@ class PlanOnlyExecutor:
         Args:
             task:                   The fuzzy task description shown to the agent.
             temperature:            Sampling temperature (0.0–2.0).  None uses the
-                                    model default.  Ignored for o-series models.
-            use_native_tools:       When True, MCP tools are passed via the OpenAI
-                                    ``tools`` field instead of being embedded as text
-                                    in the prompt.  Recommended for fine-tuned
-                                    tool-calling models.  Defaults to False.
+                                    model default.  Ignored for reasoning models.
+            use_native_tools:       When True, MCP tools are passed via the OpenRouter
+                                    ``tools`` API field using ``bind_tools()``.
+                                    Recommended for fine-tuned tool-calling models.
+                                    Defaults to False (prompt-injection mode).
             use_structured_output:  When True, ``response_format`` (json_schema) is
-                                    passed to enforce structured output.  Only applies
-                                    when ``use_native_tools`` is also True — has no
-                                    effect in text-embedding mode.  Defaults to False.
+                                    enforced via ``bind(response_format=...)``.  Only
+                                    applies when ``use_native_tools`` is also True.
+                                    Defaults to False.
             max_retries:            Maximum number of planning attempts.  On each
                                     failed validation the planner is re-invoked with
                                     the validation errors injected into the prompt.
