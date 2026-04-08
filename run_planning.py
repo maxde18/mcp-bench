@@ -13,7 +13,7 @@ output structure suitable for DAG stability analysis and anomaly detection.
      Loads fuzzy descriptions from an existing benchmark task JSON.
 
        python run_planning_benchmark.py \\
-           --tasks tasks/mcpbench_tasks_multi_2server_runner_format.json
+           --tunasks tasks/mcpbench_tasks_multi_2server_runner_format.json
 
   2. Fuzzy tasks file  (--fuzzy-tasks)
      Loads pre-generated fuzzy prompts from a separate JSON file.
@@ -102,7 +102,16 @@ for _k, _v in os.environ.items():
         os.environ[_k] = _v.replace('\r', '')
 
 from planning.agents.plan_only_executor import PlanOnlyExecutor
+from planning.agents.decompose_assemble_executor import DecomposeAssembleExecutor
 from runtime.benchmark.runner import BenchmarkRunner
+
+# Registry of available planning agents.
+# Each entry maps a CLI name to a factory that accepts (chat_model, all_tools)
+# and returns an object with an async execute() method.
+PLANNING_AGENTS = {
+    "plan-only":          lambda chat_model, all_tools: PlanOnlyExecutor(chat_model, all_tools),
+    "decompose-assemble": lambda chat_model, all_tools: DecomposeAssembleExecutor(chat_model, all_tools),
+}
 from mcp_infra.connection_manager import ConnectionManager
 from llm.factory import LLMFactory
 from synthesis.task_synthesis import TaskSynthesizer
@@ -162,6 +171,9 @@ async def run(
     native_tools: bool = False,
     structured_output: bool = False,
     distraction_servers: bool = True,
+    top_k: Optional[int] = None,
+    top_p: Optional[float] = None,
+    agent: str = "plan-only",
 ) -> None:
     # ------------------------------------------------------------------
     # LLM provider
@@ -252,9 +264,12 @@ async def run(
                 "model":         model_name,
                 "source":        source_label,
                 "experiment_config": {
+                    "agent":         agent,
                     "variations":    variations,
                     "repetitions":   repetitions,
                     "temperatures":  temperatures,
+                    "top_k":         top_k,
+                    "top_p":         top_p,
                     "total_tasks":   len(tasks),
                     "total_runs":    total_runs,
                     "native_tools":          native_tools,
@@ -309,7 +324,7 @@ async def run(
                 if not conn_mgr.all_tools:
                     raise RuntimeError("No tools discovered from any server")
 
-                executor = PlanOnlyExecutor(chat_model, conn_mgr.all_tools)
+                executor = PLANNING_AGENTS[agent](chat_model, conn_mgr.all_tools)
 
                 # Build list of (variation_id, fuzzy_description) to run.
                 # Variation 0 is always the original fuzzy description.
@@ -361,12 +376,16 @@ async def run(
                                 plan_result = await executor.execute(
                                     fuzzy_desc,
                                     temperature=temperature,
+                                    top_k=top_k,
+                                    top_p=top_p,
                                     use_native_tools=native_tools,
                                     use_structured_output=structured_output,
                                 )
                                 variation_entry["repetitions"].append(
                                     {
                                         "temperature":    temperature,
+                                        "top_k":         top_k,
+                                        "top_p":         top_p,
                                         "repetition":     rep,
                                         "status":         "success",
                                         "generated_plan": plan_result["dependency_graph"],
@@ -387,6 +406,8 @@ async def run(
                                 variation_entry["repetitions"].append(
                                     {
                                         "temperature": temperature,
+                                        "top_k":       top_k,
+                                        "top_p":       top_p,
                                         "repetition":  rep,
                                         "status":      "failed",
                                         "error":       str(e),
@@ -515,6 +536,34 @@ def main() -> None:
             "(distraction servers included)."
         ),
     )
+    parser.add_argument(
+        "--top-k",
+        type=int,
+        default=None,
+        help=(
+            "Top-K sampling value passed natively to OpenRouter. "
+            "Defaults to None (model default)."
+        ),
+    )
+    parser.add_argument(
+        "--top-p",
+        type=float,
+        default=None,
+        help=(
+            "Top-P (nucleus) sampling value (0.0–1.0) passed natively to OpenRouter. "
+            "Defaults to None (model default)."
+        ),
+    )
+    parser.add_argument(
+        "--agent",
+        default="plan-only",
+        choices=list(PLANNING_AGENTS.keys()),
+        help=(
+            "Planning agent to use. "
+            f"Available: {', '.join(PLANNING_AGENTS.keys())}. "
+            "Defaults to 'plan-only' (PlanOnlyExecutor)."
+        ),
+    )
 
     args = parser.parse_args()
 
@@ -525,7 +574,7 @@ def main() -> None:
     temperatures: List[Optional[float]] = args.temperatures if args.temperatures else [None]
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = args.output_dir or os.path.join("results", "planning", args.model, timestamp)
+    output_dir = args.output_dir or os.path.join("results", "planning", args.model, args.agent, timestamp)
 
     asyncio.run(
         run(
@@ -540,6 +589,9 @@ def main() -> None:
             native_tools=args.native_tools,
             structured_output=args.structured_output,
             distraction_servers=not args.no_distraction_servers,
+            top_k=args.top_k,
+            top_p=args.top_p,
+            agent=args.agent,
         )
     )
 

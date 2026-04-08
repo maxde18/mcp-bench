@@ -161,6 +161,8 @@ class PlannerState(TypedDict):
     use_native_tools: bool
     use_structured_output: bool
     temperature: Optional[float]
+    top_k: Optional[int]
+    top_p: Optional[float]
     dependency_graph: Dict[str, Any]
     validation: Dict[str, Any]
     tool_descriptions: str
@@ -238,12 +240,22 @@ class PlanOnlyExecutor:
         # Start from the base model and layer configuration for this run.
         model = self.base_model
 
-        # Apply temperature — skipped for reasoning models that reject it.
+        # Apply sampling parameters — temperature skipped for reasoning models.
         if (
             state["temperature"] is not None
             and model.model_name not in _MODELS_WITHOUT_TEMPERATURE
         ):
             model = model.bind(temperature=state["temperature"])
+        if state["top_p"] is not None:
+            model = model.bind(top_p=state["top_p"])
+        if state["top_k"] is not None:
+            # The openrouter SDK's Chat.send_async() does not accept top_k directly
+            # (it is only supported in the /responses endpoint).  Passing it causes
+            # a TypeError.  Log a warning and skip rather than crashing the run.
+            logger.warning(
+                "top_k is not supported by langchain-openrouter's Chat.send_async() "
+                "and will be ignored.  Use top_p for nucleus sampling instead."
+            )
 
         # Build the tool inventory (used in the few-shot block for all modes).
         api_tools = MCPConnector.format_tools_for_api(self.all_tools)
@@ -359,6 +371,8 @@ class PlanOnlyExecutor:
         self,
         task: str,
         temperature: Optional[float] = None,
+        top_k: Optional[int] = None,
+        top_p: Optional[float] = None,
         use_native_tools: bool = False,
         use_structured_output: bool = False,
         max_retries: int = 3,
@@ -369,6 +383,10 @@ class PlanOnlyExecutor:
             task:                   The fuzzy task description shown to the agent.
             temperature:            Sampling temperature (0.0–2.0).  None uses the
                                     model default.  Ignored for reasoning models.
+            top_k:                  Top-K sampling (OpenRouter native param).  None
+                                    uses the model default.
+            top_p:                  Top-P / nucleus sampling (0.0–1.0).  None uses
+                                    the model default.
             use_native_tools:       When True, MCP tools are passed via the OpenRouter
                                     ``tools`` API field using ``bind_tools()``.
                                     Recommended for fine-tuned tool-calling models.
@@ -389,6 +407,8 @@ class PlanOnlyExecutor:
                 "validation":        dict,           # DAGValidationResult.to_dict()
                 "tool_descriptions": str,            # what the agent saw (text or "native")
                 "temperature":       float | None,
+                "top_k":             int | None,
+                "top_p":             float | None,
                 "prompt_tokens":     int,
                 "completion_tokens": int,
                 "total_tokens":      int,
@@ -400,6 +420,8 @@ class PlanOnlyExecutor:
             "use_native_tools":      use_native_tools,
             "use_structured_output": use_structured_output,
             "temperature":           temperature,
+            "top_k":                 top_k,
+            "top_p":                 top_p,
             "dependency_graph": {},
             "validation":       {},
             "tool_descriptions": "",
@@ -417,6 +439,8 @@ class PlanOnlyExecutor:
             "validation":        final_state["validation"],
             "tool_descriptions": final_state["tool_descriptions"],
             "temperature":       temperature,
+            "top_k":             top_k,
+            "top_p":             top_p,
             "prompt_tokens":     final_state["prompt_tokens"],
             "completion_tokens": final_state["completion_tokens"],
             "total_tokens":      final_state["total_tokens"],

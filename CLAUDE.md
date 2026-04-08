@@ -52,9 +52,12 @@ python run_planning.py --tasks ... --model <fine-tuned-model> --native-tools
 
 # Exclude distraction servers from the prompt (only task-relevant tools shown)
 python run_planning.py --tasks ... --model claude-sonnet-4 --no-distraction-servers
+
+# Set OpenRouter native sampling parameters
+python run_planning.py --tasks ... --model qwen-3-32b --top-p 0.9 --top-k 50
 ```
 
-Results saved to `results/planning/<model>/<timestamp>/`.
+Results saved to `results/planning/<model>/<agent>/<timestamp>/`.
 
 ### Secondary: `run_benchmark.py`
 Full plan-then-execute benchmark with LLM-as-judge evaluation. Rarely used in current experimental work.
@@ -233,6 +236,7 @@ Per-server API keys go in `mcp_servers/api_key/` (NPS_API_KEY, NASA_API_KEY, HF_
 |---|---|
 | `run_planning.py` | Primary experiment runner |
 | `planning/agents/plan_only_executor.py` | Core planning agent (LangGraph + structured output) |
+| `planning/agents/decompose_assemble_executor.py` | Three-phase agent: node selection → pairwise dependency analysis → DAG assembly |
 | `planning/agents/few_shot_examples.py` | In-context DAG examples injected into prompts |
 | `planning/validation.py` | Pydantic + cycle-detection DAG validation |
 | `llm/factory.py` | Model registry and LLM client creation |
